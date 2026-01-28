@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard SDR - Performance</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0e27;
+            --bg-secondary: #141933;
+            --bg-card: #1a1f3a;
+            --accent-cyan: #00d9ff;
+            --accent-purple: #9d4edd;
+            --accent-green: #06ffa5;
+            --accent-orange: #ff6b35;
+            --accent-yellow: #ffd60a;
+            --text-primary: #ffffff;
+            --text-secondary: #8b92b0;
+            --border-color: #2a3150;
+        }
+
+        body {
+            font-family: 'Lexend', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(157, 78, 221, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(0, 217, 255, 0.15) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Login Screen - mesmo estilo anterior */
+        .login-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 50px 40px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .login-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .login-header p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .form-group select,
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 15px;
+            font-family: 'Lexend', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .form-group select:focus,
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            font-family: 'Lexend', sans-serif;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 217, 255, 0.3);
+        }
+
+        .error-message {
+            background: rgba(255, 107, 53, 0.1);
+            border: 1px solid var(--accent-orange);
+            color: var(--accent-orange);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        /* Config Panel */
+        .config-panel {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .config-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .config-input {
+            margin-bottom: 16px;
+        }
+
+        .config-input label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .config-input input {
+            width: 100%;
+            padding: 10px 12px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 13px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .btn-save-config {
+            width: 100%;
+            padding: 10px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Lexend', sans-serif;
+        }
+
+        .btn-save-config:hover {
+            border-color: var(--accent-green);
+            background: rgba(6, 255, 165, 0.1);
+        }
+
+        /* Dashboard - reuso do código anterior */
+        .dashboard {
+            display: none;
+            min-height: 100vh;
+            position: relative;
+            z-index: 1;
+        }
+
+        .dashboard.active {
+            display: block;
+        }
+
+        .dashboard-header {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            padding: 24px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-left h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .header-left p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-info {
+            text-align: right;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .user-role {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .btn-logout {
+            padding: 10px 20px;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Lexend', sans-serif;
+        }
+
+        .btn-logout:hover {
+            border-color: var(--accent-orange);
+            background: rgba(255, 107, 53, 0.1);
+            color: var(--accent-orange);
+        }
+
+        .dashboard-content {
+            padding: 40px;
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border-color);
+            border-top-color: var(--accent-cyan);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .info-banner {
+            background: rgba(0, 217, 255, 0.1);
+            border: 1px solid var(--accent-cyan);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .info-banner-icon {
+            font-size: 24px;
+        }
+
+        .info-banner-text {
+            flex: 1;
+        }
+
+        .info-banner-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .info-banner-subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        /* Stats Grid e outros componentes mantidos do código anterior */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+        }
+
+        .stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin-bottom: 14px;
+        }
+
+        .stat-icon.calls { background: rgba(0, 217, 255, 0.1); color: var(--accent-cyan); }
+        .stat-icon.effective { background: rgba(6, 255, 165, 0.1); color: var(--accent-green); }
+        .stat-icon.time { background: rgba(157, 78, 221, 0.1); color: var(--accent-purple); }
+        .stat-icon.conversion { background: rgba(255, 107, 53, 0.1); color: var(--accent-orange); }
+        .stat-icon.leads { background: rgba(255, 214, 10, 0.1); color: var(--accent-yellow); }
+        .stat-icon.money { background: rgba(6, 255, 165, 0.1); color: var(--accent-green); }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+
+        .stat-detail {
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard-header {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .dashboard-content {
+                padding: 20px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-gradient"></div>
+
+    <!-- Login Screen -->
+    <div class="login-container" id="loginScreen">
+        <div class="login-box">
+            <div class="login-header">
+                <h1>Dashboard SDR</h1>
+                <p>Acesse suas métricas de performance</p>
+            </div>
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>SDR</label>
+                    <select id="userSelect" required>
+                        <option value="">Selecione seu nome</option>
+                        <option value="Nathalia Lima">Nathalia Lima</option>
+                        <option value="Beatriz Santos">Beatriz Santos</option>
+                        <option value="Larissa Portella">Larissa Portella</option>
+                        <option value="Felipe Mitterbach">Felipe Mitterbach</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Senha</label>
+                    <input type="password" id="passwordInput" placeholder="Digite sua senha" required>
+                </div>
+                <button type="submit" class="btn-login">Entrar</button>
+            </form>
+
+            <!-- Painel de Configuração -->
+            <div class="config-panel">
+                <div class="config-title">⚙️ Configuração das Planilhas</div>
+                <div class="config-input">
+                    <label>ID da Planilha Nectar (Leadboard + Oportunidades)</label>
+                    <input type="text" id="nectarSheetId" placeholder="Cole o ID da planilha aqui">
+                </div>
+                <div class="config-input">
+                    <label>ID da Planilha de Ligações (55PBX)</label>
+                    <input type="text" id="callsSheetId" value="1Hmcq0ihu1bpwwM-MuUzAYULiilH82qj7xFyI-VnyNAo">
+                </div>
+                <button class="btn-save-config" onclick="salvarConfig()">💾 Salvar Configuração</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="dashboard" id="dashboardScreen">
+        <div class="dashboard-header">
+            <div class="header-left">
+                <h1>Performance Dashboard</h1>
+                <p id="currentDate"></p>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <div class="user-name" id="userName"></div>
+                    <div class="user-role">SDR</div>
+                </div>
+                <button class="btn-logout" id="logoutBtn">Sair</button>
+            </div>
+        </div>
+
+        <div class="dashboard-content">
+            <div id="loadingState" class="loading">
+                <div class="spinner"></div>
+                <p>Carregando seus dados do Google Sheets...</p>
+            </div>
+
+            <div id="dashboardData" style="display: none;">
+                <!-- Info Banner -->
+                <div class="info-banner">
+                    <div class="info-banner-icon">📊</div>
+                    <div class="info-banner-text">
+                        <div class="info-banner-title">Dados carregados do Google Sheets</div>
+                        <div class="info-banner-subtitle">Última atualização: <span id="lastUpdate">Carregando...</span></div>
+                    </div>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon calls">📞</div>
+                        <div class="stat-label">Total de Ligações</div>
+                        <div class="stat-value" id="totalCalls">0</div>
+                        <div class="stat-detail">Período completo</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon effective">✓</div>
+                        <div class="stat-label">Ligações Efetivas</div>
+                        <div class="stat-value" id="effectiveCalls">0</div>
+                        <div class="stat-detail">> 45 segundos</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon time">⏱</div>
+                        <div class="stat-label">Tempo Médio</div>
+                        <div class="stat-value" id="avgTime">0s</div>
+                        <div class="stat-detail">Por ligação</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon conversion">📈</div>
+                        <div class="stat-label">Taxa Aproveitamento</div>
+                        <div class="stat-value" id="conversionRate">0%</div>
+                        <div class="stat-detail">Efetivas / Total</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon leads">🎯</div>
+                        <div class="stat-label">Leads no Pipeline</div>
+                        <div class="stat-value" id="totalLeads">0</div>
+                        <div class="stat-detail">Em qualificação</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon money">💰</div>
+                        <div class="stat-label">Total Oportunidades</div>
+                        <div class="stat-value" id="totalOpportunities">0</div>
+                        <div class="stat-detail">Abertas</div>
+                    </div>
+                </div>
+
+                <!-- Mais conteúdo será adicionado aqui -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configurações
+        const CONFIG = {
+            users: {
+                'Nathalia Lima': 'sdr2025',
+                'Beatriz Santos': 'sdr2025',
+                'Larissa Portella': 'sdr2025',
+                'Felipe Mitterbach': 'sdr2025'
+            },
+            // IDs das planilhas (serão configurados pelo usuário)
+            nectarSheetId: localStorage.getItem('nectarSheetId') || '',
+            callsSheetId: localStorage.getItem('callsSheetId') || '1Hmcq0ihu1bpwwM-MuUzAYULiilH82qj7xFyI-VnyNAo'
+        };
+
+        let currentUser = null;
+
+        // Carrega configurações salvas
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('nectarSheetId').value = CONFIG.nectarSheetId;
+            document.getElementById('callsSheetId').value = CONFIG.callsSheetId;
+        });
+
+        // Salvar configuração
+        function salvarConfig() {
+            const nectarId = document.getElementById('nectarSheetId').value.trim();
+            const callsId = document.getElementById('callsSheetId').value.trim();
+
+            if (!nectarId) {
+                alert('Por favor, preencha o ID da planilha Nectar');
+                return;
+            }
+
+            localStorage.setItem('nectarSheetId', nectarId);
+            localStorage.setItem('callsSheetId', callsId);
+
+            CONFIG.nectarSheetId = nectarId;
+            CONFIG.callsSheetId = callsId;
+
+            alert('✅ Configuração salva com sucesso!');
+        }
+
+        // Login Handler
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const userName = document.getElementById('userSelect').value;
+            const password = document.getElementById('passwordInput').value;
+            const errorMsg = document.getElementById('errorMessage');
+
+            if (!userName) {
+                errorMsg.textContent = 'Por favor, selecione seu nome';
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            // Verifica se as planilhas estão configuradas
+            if (!CONFIG.nectarSheetId) {
+                errorMsg.textContent = 'Configure o ID da planilha Nectar primeiro';
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            if (CONFIG.users[userName] === password) {
+                currentUser = userName;
+                errorMsg.style.display = 'none';
+                showDashboard();
+            } else {
+                errorMsg.textContent = 'Senha incorreta. Tente novamente.';
+                errorMsg.style.display = 'block';
+            }
+        });
+
+        // Logout Handler
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            currentUser = null;
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('dashboardScreen').classList.remove('active');
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('userSelect').value = '';
+        });
+
+        // Show Dashboard
+        function showDashboard() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('dashboardScreen').classList.add('active');
+            document.getElementById('userName').textContent = currentUser;
+            
+            const now = new Date();
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('pt-BR', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+
+            loadDashboardData();
+        }
+
+        // Load Dashboard Data from Google Sheets
+        async function loadDashboardData() {
+            document.getElementById('loadingState').style.display = 'block';
+            document.getElementById('dashboardData').style.display = 'none';
+
+            console.log('=== CARREGANDO DADOS DO GOOGLE SHEETS ===');
+            console.log('Usuário:', currentUser);
+
+            try {
+                // Busca dados das 3 planilhas
+                const [leadboardData, opportunitiesData, callsData] = await Promise.all([
+                    fetchSheetData(CONFIG.nectarSheetId, 'Leadboard'),
+                    fetchSheetData(CONFIG.nectarSheetId, 'Oportunidades'),
+                    fetchSheetData(CONFIG.callsSheetId, 'Sheet1') // Ajuste o nome da aba se necessário
+                ]);
+
+                console.log('✅ Leadboard:', leadboardData.length, 'registros');
+                console.log('✅ Oportunidades:', opportunitiesData.length, 'registros');
+                console.log('✅ Ligações:', callsData.length, 'registros');
+
+                // Filtra dados do SDR logado
+                const myLeadboard = filterLeadboardByUser(leadboardData, currentUser);
+                const myOpportunities = filterOpportunitiesByUser(opportunitiesData, currentUser);
+                const myCalls = filterCallsByUser(callsData, currentUser);
+
+                console.log('📊 Meus dados:');
+                console.log('  - Leadboard:', myLeadboard.length);
+                console.log('  - Oportunidades:', myOpportunities.length);
+                console.log('  - Ligações:', myCalls.length);
+
+                // Atualiza métricas
+                updateMetrics(myLeadboard, myOpportunities, myCalls);
+
+                // Busca última atualização
+                await getLastUpdate();
+
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('dashboardData').style.display = 'block';
+
+                console.log('=== DADOS CARREGADOS COM SUCESSO ===');
+
+            } catch (error) {
+                console.error('❌ Erro ao carregar dados:', error);
+                alert('Erro ao carregar dados. Verifique:\n1. IDs das planilhas estão corretos\n2. Planilhas estão públicas ou compartilhadas\n3. Nomes das abas estão corretos');
+                
+                document.getElementById('loadingState').style.display = 'none';
+            }
+        }
+
+        // Fetch data from Google Sheets
+        async function fetchSheetData(sheetId, sheetName) {
+            const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
+            
+            console.log(`📡 Buscando aba "${sheetName}"...`);
+            
+            try {
+                const response = await fetch(url);
+                const text = await response.text();
+                
+                // Remove o prefixo do Google Sheets
+                const jsonText = text.substring(47).slice(0, -2);
+                const data = JSON.parse(jsonText);
+                
+                // Converte para array de objetos
+                const cols = data.table.cols.map(col => col.label || col.id);
+                const rows = data.table.rows.map(row => {
+                    const obj = {};
+                    row.c.forEach((cell, index) => {
+                        obj[cols[index]] = cell ? cell.v : null;
+                    });
+                    return obj;
+                });
+                
+                console.log(`✅ ${rows.length} linhas carregadas de "${sheetName}"`);
+                return rows;
+                
+            } catch (error) {
+                console.error(`❌ Erro ao buscar "${sheetName}":`, error);
+                return [];
+            }
+        }
+
+        // Filter functions
+        function filterLeadboardByUser(data, userName) {
+            return data.filter(item => item['Leadboard: Responsável'] === userName);
+        }
+
+        function filterOpportunitiesByUser(data, userName) {
+            return data.filter(item => {
+                const corresponsaveis = item['Corresponsáveis: Usuários'] || '';
+                return corresponsaveis.includes(userName);
+            });
+        }
+
+        function filterCallsByUser(data, userName) {
+            // Ajuste o nome do campo conforme sua planilha de ligações
+            return data.filter(item => item['SDR'] === userName || item['Responsável'] === userName);
+        }
+
+        // Update metrics
+        function updateMetrics(leadboard, opportunities, calls) {
+            // Ligações
+            const totalCalls = calls.length;
+            const effectiveCalls = calls.filter(c => (c['Duração'] || 0) > 45).length;
+            const avgTime = totalCalls > 0 
+                ? Math.round(calls.reduce((sum, c) => sum + (c['Duração'] || 0), 0) / totalCalls)
+                : 0;
+            const conversionRate = totalCalls > 0 ? ((effectiveCalls / totalCalls) * 100).toFixed(1) : 0;
+
+            document.getElementById('totalCalls').textContent = totalCalls;
+            document.getElementById('effectiveCalls').textContent = effectiveCalls;
+            document.getElementById('avgTime').textContent = `${avgTime}s`;
+            document.getElementById('conversionRate').textContent = `${conversionRate}%`;
+
+            // Leadboard
+            document.getElementById('totalLeads').textContent = leadboard.length;
+
+            // Oportunidades
+            const openOpps = opportunities.filter(o => o.Fase === 'Aberta');
+            document.getElementById('totalOpportunities').textContent = openOpps.length;
+        }
+
+        // Get last update
+        async function getLastUpdate() {
+            try {
+                const data = await fetchSheetData(CONFIG.nectarSheetId, 'Controle');
+                if (data.length > 0 && data[0]['Última Atualização']) {
+                    document.getElementById('lastUpdate').textContent = data[0]['Última Atualização'];
+                } else {
+                    document.getElementById('lastUpdate').textContent = 'Não disponível';
+                }
+            } catch (error) {
+                document.getElementById('lastUpdate').textContent = 'Não disponível';
+            }
+        }
+
+        console.log('🚀 Dashboard SDR v2.0 - Google Sheets Edition');
+        console.log('Senha padrão: sdr2025');
+    </script>
+</body>
+</html>
