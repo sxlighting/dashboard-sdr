@@ -1515,6 +1515,30 @@
             console.log('📋 Tabelas atualizadas');
         }
 
+        function parseGoogleSheetDate(dateValue) {
+            if (!dateValue) return null;
+            
+            // Se já é um objeto Date válido
+            if (dateValue instanceof Date && !isNaN(dateValue)) {
+                return dateValue;
+            }
+            
+            // Se é uma string
+            if (typeof dateValue === 'string') {
+                const parsed = new Date(dateValue);
+                if (!isNaN(parsed)) return parsed;
+            }
+            
+            // Se é um número (serial date do Google Sheets)
+            if (typeof dateValue === 'number') {
+                // Google Sheets usa 25569 como offset (diferença entre 1899-12-30 e 1970-01-01)
+                const date = new Date((dateValue - 25569) * 86400 * 1000);
+                if (!isNaN(date)) return date;
+            }
+            
+            return null;
+        }
+
         function applyFilters() {
             console.log('🔍 === INICIANDO APLICAÇÃO DE FILTROS ===');
             
@@ -1581,23 +1605,46 @@
             });
 
             // Aplicar filtros nas ligações (campo: data_hora_inicio)
+            console.log('🔍 Filtrando ligações...');
+            console.log('Total de ligações antes do filtro:', allData.calls.length);
+            
+            // Verificar formato das datas nas primeiras ligações
+            if (allData.calls.length > 0) {
+                console.log('Exemplo de ligação (primeira):', {
+                    data_hora_inicio_raw: allData.calls[0]['data_hora_inicio'],
+                    tipo: typeof allData.calls[0]['data_hora_inicio'],
+                    data_parsed: parseGoogleSheetDate(allData.calls[0]['data_hora_inicio'])
+                });
+                
+                // Mostrar mais exemplos
+                const exemplosCom5 = allData.calls.slice(0, 5).map(c => ({
+                    data_raw: c['data_hora_inicio'],
+                    tipo: typeof c['data_hora_inicio'],
+                    parsed: parseGoogleSheetDate(c['data_hora_inicio'])
+                }));
+                console.log('5 primeiros exemplos de datas:', exemplosCom5);
+            }
+            
             filteredData.calls = allData.calls.filter(call => {
-                if (!call['data_hora_inicio']) return false;
-                const callDate = new Date(call['data_hora_inicio']);
-                return callDate >= filterStartDate && callDate <= filterEndDate;
+                const callDate = parseGoogleSheetDate(call['data_hora_inicio']);
+                if (!callDate) return false;
+                const isValid = callDate >= filterStartDate && callDate <= filterEndDate;
+                return isValid;
             });
+            
+            console.log('✅ Ligações após filtro:', filteredData.calls.length);
 
             // Aplicar filtros no leadboard (campo: Leadboard: Data Criação)
             filteredData.leadboard = allData.leadboard.filter(lead => {
-                if (!lead['Leadboard: Data Criação']) return true; // Incluir se não tiver data
-                const leadDate = new Date(lead['Leadboard: Data Criação']);
+                const leadDate = parseGoogleSheetDate(lead['Leadboard: Data Criação']);
+                if (!leadDate) return true; // Incluir se não tiver data
                 return leadDate >= filterStartDate && leadDate <= filterEndDate;
             });
 
             // Aplicar filtros nas oportunidades (campo: Data Criação)
             filteredData.opportunities = allData.opportunities.filter(opp => {
-                if (!opp['Data Criação']) return true; // Incluir se não tiver data
-                const oppDate = new Date(opp['Data Criação']);
+                const oppDate = parseGoogleSheetDate(opp['Data Criação']);
+                if (!oppDate) return true; // Incluir se não tiver data
                 return oppDate >= filterStartDate && oppDate <= filterEndDate;
             });
 
@@ -1606,6 +1653,27 @@
                 leadboard: filteredData.leadboard.length,
                 oportunidades: filteredData.opportunities.length
             });
+
+            // Verificar se o filtro zerou todos os dados
+            if (filteredData.calls.length === 0 && allData.calls.length > 0) {
+                console.warn('⚠️ ATENÇÃO: Filtro zerou todas as ligações!');
+                console.log('Possíveis causas:');
+                console.log('1. Não há ligações neste período');
+                console.log('2. Formato de data incompatível');
+                console.log('3. Range de datas muito restritivo');
+                
+                // Verificar a data mais antiga e mais recente
+                const datas = allData.calls
+                    .filter(c => c['data_hora_inicio'])
+                    .map(c => new Date(c['data_hora_inicio']))
+                    .sort((a, b) => a - b);
+                
+                if (datas.length > 0) {
+                    console.log('Data mais antiga nas ligações:', datas[0].toLocaleString('pt-BR'));
+                    console.log('Data mais recente nas ligações:', datas[datas.length - 1].toLocaleString('pt-BR'));
+                    console.log('Filtro aplicado de:', filterStartDate.toLocaleString('pt-BR'), 'até', filterEndDate.toLocaleString('pt-BR'));
+                }
+            }
 
             console.log('🔄 Atualizando métricas e gráficos...');
             updateAllMetrics();
