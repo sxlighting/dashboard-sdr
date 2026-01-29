@@ -480,13 +480,6 @@
             font-size: 32px;
             font-weight: 700;
             font-family: 'JetBrains Mono', monospace;
-            margin-bottom: 8px;
-        }
-
-        .stage-value {
-            font-size: 14px;
-            color: var(--accent-green);
-            font-weight: 600;
         }
 
         /* Tabelas */
@@ -819,7 +812,7 @@
                 </div>
 
                 <!-- Métricas Financeiras -->
-                <div class="metrics-grid">
+                <div class="metrics-grid" style="display: none;">
                     <div class="metric-card green">
                         <div class="metric-header">
                             <div class="metric-label">Valor Total Pipeline</div>
@@ -867,22 +860,18 @@
                         <div class="pipeline-stage">
                             <div class="stage-name">Suspect</div>
                             <div class="stage-count" id="pipelineSuspect">0</div>
-                            <div class="stage-value" id="pipelineSuspectValue">R$ 0</div>
                         </div>
                         <div class="pipeline-stage">
                             <div class="stage-name">Agendamento</div>
                             <div class="stage-count" id="pipelineAgendamento">0</div>
-                            <div class="stage-value" id="pipelineAgendamentoValue">R$ 0</div>
                         </div>
                         <div class="pipeline-stage">
-                            <div class="stage-name">Qualificado</div>
-                            <div class="stage-count" id="pipelineQualificada">0</div>
-                            <div class="stage-value" id="pipelineQualificadaValue">R$ 0</div>
+                            <div class="stage-name">Qualificação</div>
+                            <div class="stage-count" id="pipelineQualificacao">0</div>
                         </div>
                         <div class="pipeline-stage">
                             <div class="stage-name">Oportunidades</div>
                             <div class="stage-count" id="pipelineOportunidades">0</div>
-                            <div class="stage-value" id="pipelineOportunidadesValue">R$ 0</div>
                         </div>
                     </div>
                 </div>
@@ -912,7 +901,7 @@
                     <div class="chart-card">
                         <div class="chart-header">
                             <h3 class="chart-title">Performance Semanal</h3>
-                            <p class="chart-subtitle">Ligações vs Conversões</p>
+                            <p class="chart-subtitle">Ligações Feitas vs Efetivas</p>
                         </div>
                         <div class="chart-container">
                             <canvas id="performanceChart"></canvas>
@@ -931,81 +920,8 @@
                 </div>
 
                 <!-- Tabelas -->
-                <div class="tables-section">
-                    <!-- Tabela de Ligações Recentes -->
-                    <div class="table-card">
-                        <div class="table-header">
-                            <h3 class="table-title">Ligações Recentes</h3>
-                            <div class="table-actions">
-                                <button class="btn-export" onclick="exportTableToCSV('callsTable', 'ligacoes.csv')">Exportar CSV</button>
-                            </div>
-                        </div>
-                        <div class="table-wrapper">
-                            <table id="callsTable">
-                                <thead>
-                                    <tr>
-                                        <th>Data/Hora</th>
-                                        <th>Telefone</th>
-                                        <th>Duração</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="callsTableBody">
-                                    <!-- Preenchido dinamicamente -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Tabela de Leadboard -->
-                    <div class="table-card">
-                        <div class="table-header">
-                            <h3 class="table-title">Leadboard Ativo</h3>
-                            <div class="table-actions">
-                                <button class="btn-export" onclick="exportTableToCSV('leadboardTable', 'leadboard.csv')">Exportar CSV</button>
-                            </div>
-                        </div>
-                        <div class="table-wrapper">
-                            <table id="leadboardTable">
-                                <thead>
-                                    <tr>
-                                        <th>Nome/Empresa</th>
-                                        <th>Etapa</th>
-                                        <th>Data Criação</th>
-                                        <th>Última Interação</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="leadboardTableBody">
-                                    <!-- Preenchido dinamicamente -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Tabela de Oportunidades -->
-                    <div class="table-card">
-                        <div class="table-header">
-                            <h3 class="table-title">Oportunidades Abertas</h3>
-                            <div class="table-actions">
-                                <button class="btn-export" onclick="exportTableToCSV('opportunitiesTable', 'oportunidades.csv')">Exportar CSV</button>
-                            </div>
-                        </div>
-                        <div class="table-wrapper">
-                            <table id="opportunitiesTable">
-                                <thead>
-                                    <tr>
-                                        <th>Título</th>
-                                        <th>Valor</th>
-                                        <th>Fase</th>
-                                        <th>Data Criação</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="opportunitiesTableBody">
-                                    <!-- Preenchido dinamicamente -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                <div class="tables-section" style="display: none;">
+                    <!-- Tabelas removidas conforme solicitado -->
                 </div>
 
                 <!-- Última Atualização -->
@@ -1141,7 +1057,6 @@
                 
                 updateAllMetrics();
                 updateCharts();
-                updateTables();
                 await getLastUpdate();
 
                 document.getElementById('loadingState').style.display = 'none';
@@ -1243,11 +1158,11 @@
             // Métricas de Leadboard por etapa
             const suspect = leadboard.filter(l => l['Leadboard: Etapa'] === 'Suspect').length;
             const agendamento = leadboard.filter(l => l['Leadboard: Etapa'] === 'Agendamento').length;
-            const qualificada = leadboard.filter(l => l['Leadboard: Etapa'] === 'Qualificada').length;
+            const qualificacao = leadboard.filter(l => l['Leadboard: Etapa'] === 'Qualificação').length;
             
             document.getElementById('totalSuspect').textContent = suspect;
             document.getElementById('totalAgendamento').textContent = agendamento;
-            document.getElementById('totalQualificada').textContent = qualificada;
+            document.getElementById('totalQualificada').textContent = qualificacao;
 
             // Oportunidades
             const openOpps = opportunities.filter(o => o.Fase === 'Aberta');
@@ -1277,13 +1192,8 @@
             // Pipeline
             document.getElementById('pipelineSuspect').textContent = suspect;
             document.getElementById('pipelineAgendamento').textContent = agendamento;
-            document.getElementById('pipelineQualificada').textContent = qualificada;
+            document.getElementById('pipelineQualificacao').textContent = qualificacao;
             document.getElementById('pipelineOportunidades').textContent = openOpps.length;
-            
-            document.getElementById('pipelineSuspectValue').textContent = 'R$ 0';
-            document.getElementById('pipelineAgendamentoValue').textContent = 'R$ 0';
-            document.getElementById('pipelineQualificadaValue').textContent = 'R$ 0';
-            document.getElementById('pipelineOportunidadesValue').textContent = formatCurrency(totalValue);
 
             console.log('📊 Métricas atualizadas');
         }
@@ -1351,14 +1261,14 @@
             const leadboardCtx = document.getElementById('leadboardChart').getContext('2d');
             const suspect = filteredData.leadboard.filter(l => l['Leadboard: Etapa'] === 'Suspect').length;
             const agendamento = filteredData.leadboard.filter(l => l['Leadboard: Etapa'] === 'Agendamento').length;
-            const qualificada = filteredData.leadboard.filter(l => l['Leadboard: Etapa'] === 'Qualificada').length;
+            const qualificacao = filteredData.leadboard.filter(l => l['Leadboard: Etapa'] === 'Qualificação').length;
 
             charts.leadboard = new Chart(leadboardCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Suspect', 'Agendamento', 'Qualificada'],
+                    labels: ['Suspect', 'Agendamento', 'Qualificação'],
                     datasets: [{
-                        data: [suspect, agendamento, qualificada],
+                        data: [suspect, agendamento, qualificacao],
                         backgroundColor: ['#ffd60a', '#00d9ff', '#06ffa5'],
                         borderWidth: 0
                     }]
@@ -1382,13 +1292,13 @@
                 data: {
                     labels: last7Days.map(d => d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })),
                     datasets: [{
-                        label: 'Ligações',
+                        label: 'Ligações Feitas',
                         data: callsByDay.total,
                         backgroundColor: 'rgba(0, 217, 255, 0.6)',
                         borderColor: '#00d9ff',
                         borderWidth: 1
                     }, {
-                        label: 'Conversões',
+                        label: 'Ligações Efetivas',
                         data: callsByDay.effective,
                         backgroundColor: 'rgba(6, 255, 165, 0.6)',
                         borderColor: '#06ffa5',
@@ -1586,51 +1496,62 @@
                     break;
                 case 'week':
                     filterEndDate = new Date();
+                    filterEndDate.setHours(23, 59, 59, 999);
                     filterStartDate = new Date();
                     filterStartDate.setDate(filterStartDate.getDate() - 7);
+                    filterStartDate.setHours(0, 0, 0, 0);
                     break;
                 case 'month':
                     filterEndDate = new Date();
+                    filterEndDate.setHours(23, 59, 59, 999);
                     filterStartDate = new Date();
                     filterStartDate.setDate(filterStartDate.getDate() - 30);
+                    filterStartDate.setHours(0, 0, 0, 0);
                     break;
                 case 'custom':
                     if (!startDate || !endDate) {
                         alert('Selecione as datas inicial e final');
                         return;
                     }
-                    filterStartDate = new Date(startDate);
-                    filterEndDate = new Date(endDate);
-                    filterEndDate.setHours(23, 59, 59, 999);
+                    filterStartDate = new Date(startDate + 'T00:00:00');
+                    filterEndDate = new Date(endDate + 'T23:59:59');
                     break;
                 default: // 'all'
                     filteredData = { ...allData };
                     updateAllMetrics();
                     updateCharts();
-                    updateTables();
                     console.log('📊 Filtros resetados - mostrando todos os dados');
                     return;
             }
 
-            // Aplicar filtros
+            console.log('🔍 Filtrando dados:', {
+                inicio: filterStartDate ? filterStartDate.toISOString() : 'N/A',
+                fim: filterEndDate ? filterEndDate.toISOString() : 'N/A'
+            });
+
+            // Aplicar filtros nas ligações
             filteredData.calls = allData.calls.filter(call => {
+                if (!call['data_hora_inicio']) return false;
                 const callDate = new Date(call['data_hora_inicio']);
                 return callDate >= filterStartDate && callDate <= filterEndDate;
             });
 
+            // Aplicar filtros no leadboard
             filteredData.leadboard = allData.leadboard.filter(lead => {
+                if (!lead['Leadboard: Data Criação']) return true; // Incluir se não tiver data
                 const leadDate = new Date(lead['Leadboard: Data Criação']);
                 return leadDate >= filterStartDate && leadDate <= filterEndDate;
             });
 
+            // Aplicar filtros nas oportunidades
             filteredData.opportunities = allData.opportunities.filter(opp => {
+                if (!opp['Data Criação']) return true; // Incluir se não tiver data
                 const oppDate = new Date(opp['Data Criação']);
                 return oppDate >= filterStartDate && oppDate <= filterEndDate;
             });
 
             updateAllMetrics();
             updateCharts();
-            updateTables();
 
             console.log('📊 Filtros aplicados:', {
                 periodo: period,
@@ -1650,7 +1571,6 @@
             filteredData = { ...allData };
             updateAllMetrics();
             updateCharts();
-            updateTables();
             
             console.log('🔄 Filtros resetados');
         }
