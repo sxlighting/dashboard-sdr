@@ -5,25 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SDR Performance Pro - Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
         /* --- RESET & VARS --- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
             --bg-primary: #0a0e27;
-            --bg-secondary: #141933;
             --bg-card: #1a1f3a;
             --accent-cyan: #00d9ff;
-            --accent-purple: #9d4edd;
             --accent-green: #06ffa5;
-            --accent-orange: #ff6b35;
-            --accent-yellow: #ffd60a;
             --text-primary: #ffffff;
             --text-secondary: #8b92b0;
             --border-color: #2a3150;
-            --glass: rgba(26, 31, 58, 0.7);
         }
 
         body {
@@ -31,153 +24,92 @@
             background: var(--bg-primary);
             color: var(--text-primary);
             overflow-x: hidden;
+            padding-bottom: 50px;
         }
 
-        /* --- BACKGROUND --- */
         .bg-gradient {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at 20% 30%, rgba(157, 78, 221, 0.1) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 70%, rgba(0, 217, 255, 0.1) 0%, transparent 50%);
-            pointer-events: none; z-index: 0;
+            background: radial-gradient(circle at 50% 0%, rgba(0, 217, 255, 0.1), transparent 70%);
+            pointer-events: none; z-index: -1;
         }
 
         /* --- LOGIN --- */
         .login-container {
             display: flex; align-items: center; justify-content: center;
-            min-height: 100vh; position: relative; z-index: 2;
+            min-height: 100vh; position: fixed; top: 0; left: 0; width: 100%;
+            background: var(--bg-primary); z-index: 999;
         }
         .login-box {
             background: var(--bg-card); border: 1px solid var(--border-color);
-            border-radius: 20px; padding: 50px 40px; width: 100%; max-width: 420px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            border-radius: 16px; padding: 40px; width: 100%; max-width: 400px;
         }
-        .login-header h1 {
-            font-size: 32px; font-weight: 700; text-align: center; margin-bottom: 8px;
-            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        .login-header p { text-align: center; color: var(--text-secondary); margin-bottom: 30px; }
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; margin-bottom: 8px; color: var(--text-secondary); font-size: 14px; }
-        .form-group input, .form-group select {
-            width: 100%; padding: 14px; background: var(--bg-secondary);
-            border: 1px solid var(--border-color); border-radius: 10px;
-            color: white; font-family: inherit; transition: 0.3s;
-        }
-        .form-group input:focus, .form-group select:focus {
-            border-color: var(--accent-cyan); outline: none;
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-size: 14px; color: var(--text-secondary); }
+        .form-input {
+            width: 100%; padding: 12px; background: #0f1225; border: 1px solid var(--border-color);
+            border-radius: 8px; color: white;
         }
         .btn-primary {
-            width: 100%; padding: 16px; background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
-            border: none; border-radius: 10px; color: white; font-weight: 600; cursor: pointer;
-            transition: 0.2s; font-family: inherit;
-        }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,217,255,0.2); }
-        .error-message {
-            color: var(--accent-orange); background: rgba(255,107,53,0.1);
-            padding: 10px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-size: 14px;
+            width: 100%; padding: 14px; background: var(--accent-cyan); border: none;
+            border-radius: 8px; font-weight: bold; cursor: pointer; color: #000; margin-top: 10px;
         }
 
         /* --- DASHBOARD --- */
-        .dashboard { display: none; min-height: 100vh; position: relative; z-index: 1; padding-bottom: 40px; }
+        .dashboard { display: none; padding: 20px; max-width: 1400px; margin: 0 auto; }
         .dashboard.active { display: block; }
         
-        .dashboard-header {
-            background: var(--glass); backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border-color); padding: 20px 40px;
+        .header {
             display: flex; justify-content: space-between; align-items: center;
-            position: sticky; top: 0; z-index: 100;
+            padding: 20px 0; border-bottom: 1px solid var(--border-color); margin-bottom: 30px;
         }
-        .header-right { display: flex; align-items: center; gap: 20px; }
-        .user-name { font-weight: 600; }
-        .user-role { font-size: 12px; color: var(--text-secondary); text-align: right; }
-        .btn-logout {
-            background: transparent; border: 1px solid var(--border-color); color: var(--text-secondary);
-            padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: 0.2s;
-        }
-        .btn-logout:hover { border-color: var(--accent-orange); color: var(--accent-orange); }
 
-        .dashboard-content { max-width: 1600px; margin: 0 auto; padding: 30px 40px; }
-
-        /* --- FILTERS --- */
+        /* --- FILTROS --- */
         .filter-bar {
-            display: flex; gap: 15px; margin-bottom: 30px; flex-wrap: wrap;
-            background: var(--bg-card); padding: 20px; border-radius: 16px; border: 1px solid var(--border-color);
-            align-items: end;
+            display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 30px;
+            background: var(--bg-card); padding: 15px; border-radius: 12px; border: 1px solid var(--border-color);
+            align-items: flex-end;
         }
-        .filter-group { display: flex; flex-direction: column; gap: 8px; }
-        .filter-group label { font-size: 12px; color: var(--text-secondary); font-weight: 600; }
+        .filter-item { display: flex; flex-direction: column; gap: 5px; }
+        .filter-item label { font-size: 12px; color: var(--text-secondary); }
         .date-input {
-            background: var(--bg-secondary); border: 1px solid var(--border-color);
-            color: white; padding: 10px; border-radius: 8px; font-family: 'Lexend', sans-serif;
-        }
-        .btn-filter {
-            padding: 10px 24px; background: var(--accent-cyan); color: #000; font-weight: 600;
-            border: none; border-radius: 8px; cursor: pointer; height: 42px;
+            padding: 8px; background: var(--bg-primary); border: 1px solid var(--border-color);
+            color: white; border-radius: 6px; font-family: 'Lexend', sans-serif;
         }
 
-        /* --- KPIS --- */
+        /* --- GRID --- */
         .stats-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;
         }
-        .stat-card {
+        .card {
             background: var(--bg-card); border: 1px solid var(--border-color);
-            border-radius: 16px; padding: 20px; position: relative; overflow: hidden;
-            transition: transform 0.2s;
+            border-radius: 12px; padding: 20px;
         }
-        .stat-card:hover { transform: translateY(-4px); border-color: var(--accent-cyan); }
-        .stat-top { display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px; }
-        .stat-icon {
-            width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px;
-        }
-        .stat-label { font-size: 12px; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; }
-        .stat-value { font-size: 28px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
-        .stat-sub { font-size: 12px; color: var(--text-secondary); margin-top: 5px; }
+        .kpi-label { font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
+        .kpi-value { font-size: 28px; font-weight: 700; font-family: 'JetBrains Mono', monospace; margin: 10px 0; }
+        .kpi-sub { font-size: 12px; color: var(--text-secondary); }
 
-        /* Cores dos Icones */
-        .icon-call { background: rgba(0, 217, 255, 0.15); color: var(--accent-cyan); }
-        .icon-money { background: rgba(6, 255, 165, 0.15); color: var(--accent-green); }
-        .icon-warn { background: rgba(255, 214, 10, 0.15); color: var(--accent-yellow); }
-        .icon-fire { background: rgba(255, 107, 53, 0.15); color: var(--accent-orange); }
-
-        /* --- CHARTS --- */
-        .charts-grid {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;
-        }
+        /* --- CHART FIX --- */
+        .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
         .chart-card {
             background: var(--bg-card); border: 1px solid var(--border-color);
-            border-radius: 16px; padding: 24px; min-height: 350px;
+            border-radius: 12px; padding: 20px;
         }
-        .chart-title { font-size: 16px; font-weight: 600; margin-bottom: 20px; color: var(--text-primary); }
+        /* AQUI ESTÁ A CORREÇÃO DO SCROLL */
+        .chart-wrapper {
+            position: relative;
+            height: 300px; /* Altura fixa impede crescimento infinito */
+            width: 100%;
+        }
 
-        /* --- TABLE --- */
-        .table-container {
-            background: var(--bg-card); border: 1px solid var(--border-color);
-            border-radius: 16px; padding: 24px; overflow-x: auto;
-        }
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; color: var(--text-secondary); font-size: 12px; padding: 12px; border-bottom: 1px solid var(--border-color); }
-        td { padding: 16px 12px; border-bottom: 1px solid var(--border-color); font-size: 14px; }
+        /* --- TABELA --- */
+        .table-responsive { overflow-x: auto; background: var(--bg-card); border-radius: 12px; padding: 20px; border: 1px solid var(--border-color); }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        th { text-align: left; font-size: 12px; color: var(--text-secondary); padding: 10px; border-bottom: 1px solid var(--border-color); }
+        td { padding: 15px 10px; font-size: 14px; border-bottom: 1px solid #2a3150; }
         tr:last-child td { border-bottom: none; }
-        .status-badge {
-            padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block;
-        }
-        .status-aberta { background: rgba(0, 217, 255, 0.1); color: var(--accent-cyan); }
-        .status-ganha { background: rgba(6, 255, 165, 0.1); color: var(--accent-green); }
-        .status-perdida { background: rgba(255, 107, 53, 0.1); color: var(--accent-orange); }
 
-        /* LOADING */
-        .loading { text-align: center; padding: 50px; }
-        .spinner {
-            width: 40px; height: 40px; border: 3px solid var(--border-color);
-            border-top-color: var(--accent-cyan); border-radius: 50%;
-            animation: spin 1s linear infinite; margin: 0 auto 20px;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        @media (max-width: 900px) {
-            .charts-grid { grid-template-columns: 1fr; }
-            .dashboard-header { flex-direction: column; gap: 15px; }
+        @media (max-width: 768px) {
+            .charts-row { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -186,15 +118,12 @@
 
     <div class="login-container" id="loginScreen">
         <div class="login-box">
-            <div class="login-header">
-                <h1>Dashboard SDR</h1>
-                <p>Performance & Analytics</p>
-            </div>
-            <div id="errorMessage" class="error-message" style="display: none;"></div>
+            <h2 style="margin-bottom: 20px; text-align: center;">Acesso SDR</h2>
+            <div id="errorMsg" style="color: #ff6b35; text-align: center; display: none; margin-bottom: 15px; font-size: 13px;">Senha incorreta</div>
             <form id="loginForm">
                 <div class="form-group">
-                    <label>SDR Responsável</label>
-                    <select id="userSelect" required>
+                    <label>Seu Nome</label>
+                    <select id="userSelect" class="form-input" required>
                         <option value="">Selecione...</option>
                         <option value="Nathalia Lima">Nathalia Lima</option>
                         <option value="Beatriz Santos">Beatriz Santos</option>
@@ -203,474 +132,362 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Senha de Acesso</label>
-                    <input type="password" id="passwordInput" placeholder="••••••••" required>
+                    <label>Senha</label>
+                    <input type="password" id="passInput" class="form-input" required>
                 </div>
-                <button type="submit" class="btn-primary">Acessar Dashboard</button>
+                <button type="submit" class="btn-primary">Entrar</button>
             </form>
         </div>
     </div>
 
-    <div class="dashboard" id="dashboardScreen">
-        <div class="dashboard-header">
+    <div class="dashboard" id="dashScreen">
+        <div class="header">
             <div>
-                <h1 style="font-size: 20px;">SDR Analytics</h1>
-                <p style="font-size: 13px; color: var(--text-secondary);" id="currentDate">...</p>
+                <h1>Performance</h1>
+                <p style="color: var(--text-secondary); font-size: 14px;" id="currentDate">...</p>
             </div>
-            <div class="header-right">
-                <div class="user-info">
-                    <div class="user-name" id="userNameDisplay">Usuário</div>
-                    <div class="user-role">SDR Senior</div>
-                </div>
-                <button class="btn-logout" id="logoutBtn">Sair</button>
-            </div>
+            <button onclick="location.reload()" style="background:none; border:1px solid #333; color:#fff; padding:8px 15px; border-radius:6px; cursor:pointer;">Sair</button>
         </div>
 
-        <div class="dashboard-content">
-            
-            <div class="filter-bar">
-                <div class="filter-group">
-                    <label>Data Início</label>
-                    <input type="date" id="dateStart" class="date-input">
+        <div class="filter-bar">
+            <div class="filter-item">
+                <label>Início</label>
+                <input type="date" id="dateStart" class="date-input">
+            </div>
+            <div class="filter-item">
+                <label>Fim</label>
+                <input type="date" id="dateEnd" class="date-input">
+            </div>
+            <button onclick="applyFilters()" class="btn-primary" style="width: auto; margin: 0; padding: 8px 20px;">Filtrar</button>
+        </div>
+
+        <div id="loading" style="text-align: center; padding: 40px; display: none;">
+            <p>Carregando dados...</p>
+        </div>
+
+        <div id="content" style="display: none;">
+            <div class="stats-grid">
+                <div class="card">
+                    <div class="kpi-label">Ligações Totais</div>
+                    <div class="kpi-value" id="valCalls">0</div>
+                    <div class="kpi-sub" id="valEffective">0 > 45s</div>
                 </div>
-                <div class="filter-group">
-                    <label>Data Fim</label>
-                    <input type="date" id="dateEnd" class="date-input">
+                <div class="card">
+                    <div class="kpi-label">Em Qualificação</div>
+                    <div class="kpi-value" id="valSuspect" style="color: #ffd60a;">0</div>
+                    <div class="kpi-sub">Suspect</div>
                 </div>
-                <button onclick="applyFilters()" class="btn-filter">Filtrar Dados</button>
-                <div style="flex: 1; text-align: right; align-self: center; font-size: 12px; color: var(--text-secondary);">
-                    Última sinc: <span id="lastUpdate">...</span>
+                <div class="card">
+                    <div class="kpi-label">Qualificados</div>
+                    <div class="kpi-value" id="valQualified" style="color: #06ffa5;">0</div>
+                    <div class="kpi-sub">Prontos p/ Venda</div>
+                </div>
+                <div class="card">
+                    <div class="kpi-label">Pipeline Gerado</div>
+                    <div class="kpi-value" id="valMoney" style="color: #06ffa5;">R$ 0,00</div>
+                    <div class="kpi-sub" id="valOppCount">0 Oportunidades</div>
                 </div>
             </div>
 
-            <div id="loadingState" class="loading">
-                <div class="spinner"></div>
-                <p>Processando dados do Nectar & VoIP...</p>
-            </div>
-
-            <div id="dashboardData" style="display: none;">
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-top">
-                            <div>
-                                <div class="stat-label">Total Ligações</div>
-                                <div class="stat-value" id="kpiCalls">0</div>
-                            </div>
-                            <div class="stat-icon icon-call">📞</div>
-                        </div>
-                        <div class="stat-sub" id="kpiEffective">0 efetivas (>45s)</div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-top">
-                            <div>
-                                <div class="stat-label">Em Qualificação</div>
-                                <div class="stat-value" id="kpiSuspect">0</div>
-                            </div>
-                            <div class="stat-icon icon-warn">🎯</div>
-                        </div>
-                        <div class="stat-sub">Etapa: Suspect</div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-top">
-                            <div>
-                                <div class="stat-label">Qualificados</div>
-                                <div class="stat-value" id="kpiQualified">0</div>
-                            </div>
-                            <div class="stat-icon icon-money">✅</div>
-                        </div>
-                        <div class="stat-sub">Leads prontos p/ venda</div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-top">
-                            <div>
-                                <div class="stat-label">Pipeline Gerado</div>
-                                <div class="stat-value" id="kpiMoney">R$ 0</div>
-                            </div>
-                            <div class="stat-icon icon-money">💰</div>
-                        </div>
-                        <div class="stat-sub" id="kpiOppsCount">0 Oportunidades</div>
-                    </div>
-                </div>
-
-                <div class="charts-grid">
-                    <div class="chart-card">
-                        <div class="chart-title">Funil de Conversão (Leadboard)</div>
+            <div class="charts-row">
+                <div class="chart-card">
+                    <h3 style="font-size: 16px; margin-bottom: 15px;">Funil de Conversão</h3>
+                    <div class="chart-wrapper">
                         <canvas id="funnelChart"></canvas>
                     </div>
-                    <div class="chart-card">
-                        <div class="chart-title">Volume de Ligações (Diário)</div>
+                </div>
+                <div class="chart-card">
+                    <h3 style="font-size: 16px; margin-bottom: 15px;">Atividade Diária</h3>
+                    <div class="chart-wrapper">
                         <canvas id="callsChart"></canvas>
                     </div>
                 </div>
+            </div>
 
-                <div class="table-container">
-                    <h3 class="chart-title">Últimas Oportunidades</h3>
-                    <div style="overflow-x: auto;">
-                        <table id="oppsTable">
-                            <thead>
-                                <tr>
-                                    <th>Nome / Cliente</th>
-                                    <th>Fase</th>
-                                    <th>Valor Estimado</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                </tbody>
-                        </table>
-                    </div>
-                </div>
-
+            <div class="table-responsive">
+                <h3 style="font-size: 16px; margin-bottom: 15px;">Últimas Oportunidades</h3>
+                <table id="oppTable">
+                    <thead>
+                        <tr>
+                            <th>Cliente / Oportunidade</th>
+                            <th>Fase</th>
+                            <th>Valor</th>
+                            <th>Data</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
             </div>
         </div>
     </div>
 
     <script>
-        // --- CONFIGURAÇÃO ---
+        // --- CONFIG ---
         const CONFIG = {
-            users: {
-                'Nathalia Lima': 'sdr2025',
-                'Beatriz Santos': 'sdr2025',
-                'Larissa Portella': 'sdr2025',
-                'Felipe Mitterbach': 'sdr2025'
-            },
-            emailMapping: {
-                'nathalia': 'Nathalia Lima',
-                'beatriz': 'Beatriz Santos',
-                'larissa': 'Larissa Portella',
-                'felipe': 'Felipe Mitterbach'
-            },
-            nectarSheetId: '17g2rGIZUzRRNh4_ez2VooykpVt8yIQjIcL3He_hoOOw',
-            callsSheetId: '1Hmcq0ihu1bpwwM-MuUzAYULiilH82qj7xFyI-VnyNAo'
+            users: { 'Nathalia Lima': 'sdr2025', 'Beatriz Santos': 'sdr2025', 'Larissa Portella': 'sdr2025', 'Felipe Mitterbach': 'sdr2025' },
+            emailMap: { 'nathalia': 'Nathalia Lima', 'beatriz': 'Beatriz Santos', 'larissa': 'Larissa Portella', 'felipe': 'Felipe Mitterbach' },
+            nectarId: '17g2rGIZUzRRNh4_ez2VooykpVt8yIQjIcL3He_hoOOw',
+            callsId: '1Hmcq0ihu1bpwwM-MuUzAYULiilH82qj7xFyI-VnyNAo'
         };
 
-        // Estado Global
         let state = {
-            currentUser: null,
-            rawData: { leadboard: [], opportunities: [], calls: [] },
-            filteredData: { leadboard: [], opportunities: [], calls: [] },
+            user: null,
+            raw: { leadboard: [], opps: [], calls: [] },
             charts: { funnel: null, calls: null }
         };
 
-        // --- INICIALIZAÇÃO E EVENTOS ---
-
+        // --- INICIALIZAÇÃO ---
         document.addEventListener('DOMContentLoaded', () => {
-            // Setup datas padrão (Mês Atual)
-            const today = new Date();
-            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+            const now = new Date();
+            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
             document.getElementById('dateStart').valueAsDate = firstDay;
-            document.getElementById('dateEnd').valueAsDate = today;
-            
-            // Data no header
-            document.getElementById('currentDate').textContent = today.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+            document.getElementById('dateEnd').valueAsDate = now;
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
         });
 
         document.getElementById('loginForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            const user = document.getElementById('userSelect').value;
-            const pass = document.getElementById('passwordInput').value;
-            
-            if (CONFIG.users[user] === pass) {
-                state.currentUser = user;
-                document.getElementById('userNameDisplay').textContent = user;
+            const u = document.getElementById('userSelect').value;
+            const p = document.getElementById('passInput').value;
+            if (CONFIG.users[u] === p) {
+                state.user = u;
                 document.getElementById('loginScreen').style.display = 'none';
-                document.getElementById('dashboardScreen').classList.add('active');
-                fetchData();
+                document.getElementById('dashScreen').classList.add('active');
+                loadData();
             } else {
-                const err = document.getElementById('errorMessage');
-                err.textContent = "Senha incorreta.";
-                err.style.display = 'block';
+                document.getElementById('errorMsg').style.display = 'block';
             }
         });
 
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            window.location.reload();
-        });
-
-        // --- FETCH DE DADOS ---
-
-        async function fetchData() {
-            document.getElementById('loadingState').style.display = 'block';
-            
+        // --- CARREGAMENTO DE DADOS ---
+        async function loadData() {
+            document.getElementById('loading').style.display = 'block';
             try {
-                const [leadboard, opportunities, calls] = await Promise.all([
-                    fetchSheet(CONFIG.nectarSheetId, 'Leadboard'),
-                    fetchSheet(CONFIG.nectarSheetId, 'Oportunidades'),
-                    fetchSheet(CONFIG.callsSheetId, 'Ligacoes')
+                const [leadboard, opps, calls] = await Promise.all([
+                    fetchSheet(CONFIG.nectarId, 'Leadboard'),
+                    fetchSheet(CONFIG.nectarId, 'Oportunidades'),
+                    fetchSheet(CONFIG.callsId, 'Ligacoes')
                 ]);
 
-                // Armazena dados brutos filtrados APENAS pelo usuário (sem data ainda)
-                state.rawData.leadboard = filterByUser(leadboard, 'Leadboard: Responsável');
-                state.rawData.opportunities = filterOppsByUser(opportunities);
-                state.rawData.calls = filterCallsByUser(calls);
-
-                applyFilters(); // Aplica o filtro de data inicial
+                // Filtro inicial por usuário
+                state.raw.leadboard = leadboard.filter(r => r['Leadboard: Responsável'] === state.user);
                 
-                document.getElementById('loadingState').style.display = 'none';
-                document.getElementById('dashboardData').style.display = 'block';
+                state.raw.opps = opps.filter(r => {
+                    const res = r['Corresponsáveis: Usuários'] || '';
+                    return res.includes(state.user);
+                });
 
-            } catch (error) {
-                console.error("Erro fatal:", error);
-                alert("Erro ao conectar com Google Sheets. Verifique o console.");
+                state.raw.calls = calls.filter(r => {
+                    const email = (r['usuario_email'] || '').toLowerCase();
+                    for(let k in CONFIG.emailMap) {
+                        if(email.includes(k) && CONFIG.emailMap[k] === state.user) return true;
+                    }
+                    return false;
+                });
+
+                applyFilters();
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+
+            } catch (e) {
+                alert('Erro ao carregar dados. Verifique a conexão.');
+                console.error(e);
             }
         }
 
-        async function fetchSheet(id, sheetName) {
-            const url = `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
-            const res = await fetch(url);
-            const txt = await res.text();
-            const json = JSON.parse(txt.substring(47).slice(0, -2));
-            
+        async function fetchSheet(id, sheet) {
+            const url = `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheet)}`;
+            const r = await fetch(url);
+            const t = await r.text();
+            const json = JSON.parse(t.substring(47).slice(0, -2));
             const cols = json.table.cols.map(c => c.label || c.id);
-            return json.table.rows.map(r => {
+            return json.table.rows.map(row => {
                 let obj = {};
-                r.c.forEach((cell, i) => obj[cols[i]] = cell ? cell.v : null);
+                row.c.forEach((cell, i) => obj[cols[i]] = cell ? cell.v : null);
                 return obj;
             });
         }
 
-        // --- LÓGICA DE FILTROS ---
-
-        function filterByUser(data, colName) {
-            return data.filter(row => row[colName] === state.currentUser);
-        }
-
-        function filterOppsByUser(data) {
-            return data.filter(row => (row['Corresponsáveis: Usuários'] || '').includes(state.currentUser));
-        }
-
-        function filterCallsByUser(data) {
-            return data.filter(row => {
-                const email = (row['usuario_email'] || '').toLowerCase();
-                for (let key in CONFIG.emailMapping) {
-                    if (email.includes(key) && CONFIG.emailMapping[key] === state.currentUser) return true;
-                }
-                return false;
-            });
+        // --- PARSING & FILTROS ---
+        
+        // Função Especial para limpar Valor Monetário
+        function parseCurrency(val) {
+            if (!val) return 0;
+            if (typeof val === 'number') return val;
+            
+            // Ex: "R$ 1.200,50" -> "1200.50"
+            // 1. Remove tudo que não é número, ponto ou vírgula
+            let clean = val.toString().replace(/[^\d.,]/g, '');
+            
+            // 2. Se tiver vírgula, substitui ponto de milhar por vazio e vírgula por ponto
+            if (clean.includes(',')) {
+                clean = clean.replace(/\./g, '').replace(',', '.');
+            }
+            
+            const num = parseFloat(clean);
+            return isNaN(num) ? 0 : num;
         }
 
         window.applyFilters = function() {
-            const start = new Date(document.getElementById('dateStart').value);
-            const end = new Date(document.getElementById('dateEnd').value);
-            end.setHours(23, 59, 59); // Fim do dia
+            const dStart = new Date(document.getElementById('dateStart').value);
+            const dEnd = new Date(document.getElementById('dateEnd').value);
+            dEnd.setHours(23, 59, 59);
 
-            // Helper para verificar data. 
-            // Tenta achar colunas comuns de data. Se não achar, assume que o registro entra.
-            const isDateInRange = (row, dateCols) => {
-                let dateVal = null;
-                for (let col of dateCols) {
-                    if (row[col]) {
-                        // Tenta converter "Date(2024,0,1)" ou string ISO
-                        if (typeof row[col] === 'string' && row[col].includes('Date')) {
-                            const parts = row[col].match(/\d+/g);
-                            dateVal = new Date(parts[0], parts[1], parts[2]);
-                        } else {
-                            dateVal = new Date(row[col]);
-                        }
-                        break;
-                    }
-                }
-                
-                // Se não tem data, vamos mostrar (assumindo Leadboard estático). 
-                // Para ligações, se não tiver data, ignoramos.
-                if (!dateVal || isNaN(dateVal.getTime())) return true; 
-                return dateVal >= start && dateVal <= end;
-            };
-
-            // 1. Filtrar Ligações (Geralmente tem coluna 'data' ou 'data_inicio')
-            state.filteredData.calls = state.rawData.calls.filter(c => 
-                isDateInRange(c, ['data', 'data_inicio', 'created_at', 'Data'])
-            );
-
-            // 2. Filtrar Oportunidades (Coluna 'Data de Criação' ou 'Data')
-            state.filteredData.opportunities = state.rawData.opportunities.filter(o => 
-                isDateInRange(o, ['Data de criação', 'Data', 'Criado em'])
-            );
-
-            // 3. Filtrar Leadboard (Leadboard geralmente é snapshot, mas se tiver data de entrada na etapa...)
-            // Se não tiver coluna de data clara, mantemos todos do usuário para mostrar o pipeline atual
-            state.filteredData.leadboard = state.rawData.leadboard; 
-
-            updateDashboard();
-        };
-
-
-        // --- ATUALIZAÇÃO DA UI ---
-
-        function updateDashboard() {
-            const { leadboard, opportunities, calls } = state.filteredData;
-
-            // 1. Cards KPI
-            const totalCalls = calls.length;
-            const effectiveCalls = calls.filter(c => (parseInt(c['duracao_segundos']) || 0) > 45).length;
-            
-            // CORREÇÃO DO BUG: Normalização de Strings para 'Qualificada'
-            const suspect = leadboard.filter(l => cleanStr(l['Leadboard: Etapa']) === 'suspect').length;
-            const qualified = leadboard.filter(l => cleanStr(l['Leadboard: Etapa']).includes('qualificada')).length;
-
-            // Financeiro (Soma Valor das Oportunidades)
-            // Procura coluna 'Valor', 'Receita' ou 'Budget'
-            let totalValue = 0;
-            opportunities.forEach(op => {
-                // Tenta limpar "R$ 1.000,00" para float ou pegar direto se for numero
-                let val = op['Valor'] || op['Receita'] || op['Valor Estimado'] || 0;
-                if (typeof val === 'string') {
-                    val = parseFloat(val.replace('R$', '').replace('.', '').replace(',', '.'));
-                }
-                if (!isNaN(val)) totalValue += val;
+            // Filtrar Oportunidades por Data
+            const filteredOpps = state.raw.opps.filter(o => {
+                const dDate = new Date(o['Data de criação'] || o['Data'] || o['Criado em']); // Ajuste o nome da coluna se precisar
+                return !isNaN(dDate) && dDate >= dStart && dDate <= dEnd;
             });
 
-            // Update DOM
-            document.getElementById('kpiCalls').textContent = totalCalls;
-            document.getElementById('kpiEffective').textContent = `${effectiveCalls} efetivas (>45s)`;
-            document.getElementById('kpiSuspect').textContent = suspect;
-            document.getElementById('kpiQualified').textContent = qualified;
-            document.getElementById('kpiMoney').textContent = totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            document.getElementById('kpiOppsCount').textContent = `${opportunities.length} Oportunidades`;
+            // Filtrar Ligações por Data
+            const filteredCalls = state.raw.calls.filter(c => {
+                let dDate;
+                if(c['data']) { // Formato GViz
+                   if(typeof c['data'] === 'string' && c['data'].includes('Date')) 
+                       dDate = new Date(eval("new " + c['data']));
+                   else dDate = new Date(c['data']);
+                }
+                return !isNaN(dDate) && dDate >= dStart && dDate <= dEnd;
+            });
 
-            // 2. Gráficos
-            renderCharts(suspect, leadboard.filter(l => cleanStr(l['Leadboard: Etapa']) === 'agendamento').length, qualified, calls);
+            // Leadboard é snapshot (geralmente não tem data de criação fácil), mantemos o filtro de data APENAS para opps e calls
+            // Se quiser filtrar leadboard, precisaria de uma coluna "Data Entrada"
+            const filteredLeadboard = state.raw.leadboard; 
 
-            // 3. Tabela
-            renderTable(opportunities);
+            updateUI(filteredLeadboard, filteredOpps, filteredCalls);
+        };
+
+        function updateUI(leadboard, opps, calls) {
+            // 1. Calls KPI
+            const totalCalls = calls.length;
+            const effectiveCalls = calls.filter(c => (c['duracao_segundos'] || 0) > 45).length;
+            
+            // 2. Pipeline KPI (Correção do Bug de Qualificados)
+            let countSuspect = 0;
+            let countQualified = 0;
+
+            leadboard.forEach(l => {
+                // Normaliza string para lowercase e remove espaços
+                const stage = (l['Leadboard: Etapa'] || '').toLowerCase().trim();
+                
+                // Lógica mais flexível
+                if(stage.includes('suspect')) countSuspect++;
+                if(stage.includes('qualificad') || stage.includes('ganha')) countQualified++; 
+            });
+
+            // 3. Financeiro KPI (Correção do Bug de Valor)
+            let totalValue = 0;
+            opps.forEach(o => {
+                // Tenta achar a coluna de valor em várias possibilidades
+                const valRaw = o['Valor'] || o['Receita'] || o['Valor Estimado'] || o['Budget'];
+                totalValue += parseCurrency(valRaw);
+            });
+
+            // DOM Updates
+            document.getElementById('valCalls').textContent = totalCalls;
+            document.getElementById('valEffective').textContent = `${effectiveCalls} > 45s`;
+            document.getElementById('valSuspect').textContent = countSuspect;
+            document.getElementById('valQualified').textContent = countQualified;
+            document.getElementById('valMoney').textContent = totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            document.getElementById('valOppCount').textContent = `${opps.length} opps`;
+
+            // Tabelas e Gráficos
+            renderTable(opps);
+            renderCharts(countSuspect, countQualified, calls);
         }
 
-        function cleanStr(str) {
-            return str ? str.toString().toLowerCase().trim() : '';
+        function renderTable(opps) {
+            const tbody = document.querySelector('#oppTable tbody');
+            tbody.innerHTML = '';
+            opps.slice(0, 8).forEach(o => {
+                const tr = document.createElement('tr');
+                const val = parseCurrency(o['Valor'] || o['Valor Estimado']);
+                const dateRaw = o['Data de criação'] || o['Data'];
+                let dateStr = '-';
+                
+                if (dateRaw) {
+                    const d = new Date(dateRaw);
+                    if (!isNaN(d)) dateStr = d.toLocaleDateString('pt-BR');
+                }
+
+                tr.innerHTML = `
+                    <td style="font-weight:600">${o['Oportunidade'] || o['Nome'] || 'Cliente'}</td>
+                    <td><span style="background:rgba(255,255,255,0.1); padding:2px 8px; border-radius:4px; font-size:12px;">${o['Fase'] || '-'}</span></td>
+                    <td style="font-family:'JetBrains Mono'">${val.toLocaleString('pt-BR', {style:'currency', currency:'BRL'})}</td>
+                    <td style="color:#8b92b0; font-size:12px;">${dateStr}</td>
+                `;
+                tbody.appendChild(tr);
+            });
         }
 
-        // --- GRÁFICOS (CHART.JS) ---
+        function renderCharts(suspect, qualified, calls) {
+            // Config comum
+            Chart.defaults.color = '#8b92b0';
+            Chart.defaults.borderColor = '#2a3150';
 
-        function renderCharts(suspect, scheduling, qualified, calls) {
-            // -- Gráfico de Funil --
-            const ctxFunnel = document.getElementById('funnelChart').getContext('2d');
-            if (state.charts.funnel) state.charts.funnel.destroy();
-
-            state.charts.funnel = new Chart(ctxFunnel, {
+            // Funil
+            if(state.charts.funnel) state.charts.funnel.destroy();
+            state.charts.funnel = new Chart(document.getElementById('funnelChart'), {
                 type: 'bar',
                 data: {
-                    labels: ['Suspect', 'Agendamento', 'Qualificada'],
+                    labels: ['Suspect', 'Qualificado'],
                     datasets: [{
-                        label: 'Leads por Etapa',
-                        data: [suspect, scheduling, qualified],
-                        backgroundColor: [
-                            'rgba(255, 214, 10, 0.6)', // Amarelo
-                            'rgba(0, 217, 255, 0.6)',  // Cyan
-                            'rgba(6, 255, 165, 0.6)'   // Verde
-                        ],
-                        borderColor: [
-                            '#ffd60a', '#00d9ff', '#06ffa5'
-                        ],
-                        borderWidth: 1
+                        label: 'Leads',
+                        data: [suspect, qualified],
+                        backgroundColor: ['#ffd60a', '#06ffa5'],
+                        barThickness: 40
                     }]
                 },
                 options: {
-                    indexAxis: 'y', // Funil Horizontal
+                    indexAxis: 'y',
                     responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { grid: { color: '#2a3150' }, ticks: { color: '#8b92b0' } },
-                        y: { grid: { display: false }, ticks: { color: '#fff' } }
-                    }
+                    maintainAspectRatio: false, // IMPORTANTE PARA O CSS CONTROLAR A ALTURA
+                    plugins: { legend: { display: false } }
                 }
             });
 
-            // -- Gráfico de Ligações por Dia --
-            // Agrupar ligações por data
+            // Linha do tempo
             const callsByDate = {};
             calls.forEach(c => {
-                let dateKey = 'N/D';
-                // Tenta achar a data
-                const colDate = c['data'] || c['data_inicio'] || c['Data'];
-                if (colDate) {
-                    let d = (typeof colDate === 'string' && colDate.includes('Date')) 
-                        ? new Date(eval("new " + colDate)) // Safe eval for Gviz date format
-                        : new Date(colDate);
-                    
-                    if (!isNaN(d)) dateKey = d.toLocaleDateString('pt-BR');
+                let dKey = 'N/D';
+                if(c['data']) {
+                     // Lógica para extrair data do GViz string ou objeto Date
+                     const raw = c['data'];
+                     const d = (typeof raw === 'string' && raw.includes('Date')) ? new Date(eval("new " + raw)) : new Date(raw);
+                     if(!isNaN(d)) dKey = d.toLocaleDateString('pt-BR');
                 }
-                callsByDate[dateKey] = (callsByDate[dateKey] || 0) + 1;
+                callsByDate[dKey] = (callsByDate[dKey] || 0) + 1;
             });
 
+            // Ordenar datas
             const labels = Object.keys(callsByDate).sort((a,b) => {
-                // Ordenação simples de data pt-BR
-                const [da, ma, ya] = a.split('/');
-                const [db, mb, yb] = b.split('/');
+                const [da, ma, ya] = a.split('/').map(Number);
+                const [db, mb, yb] = b.split('/').map(Number);
                 return new Date(ya, ma-1, da) - new Date(yb, mb-1, db);
             });
 
-            const ctxCalls = document.getElementById('callsChart').getContext('2d');
-            if (state.charts.calls) state.charts.calls.destroy();
-
-            state.charts.calls = new Chart(ctxCalls, {
+            if(state.charts.calls) state.charts.calls.destroy();
+            state.charts.calls = new Chart(document.getElementById('callsChart'), {
                 type: 'line',
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Volume Diário',
+                        label: 'Ligações',
                         data: labels.map(l => callsByDate[l]),
-                        borderColor: '#9d4edd',
-                        backgroundColor: 'rgba(157, 78, 221, 0.1)',
+                        borderColor: '#00d9ff',
+                        backgroundColor: 'rgba(0, 217, 255, 0.1)',
                         fill: true,
-                        tension: 0.4
+                        tension: 0.3
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
+                    maintainAspectRatio: false, // IMPORTANTE
                     plugins: { legend: { display: false } },
-                    scales: {
-                        x: { grid: { display: false }, ticks: { color: '#8b92b0' } },
-                        y: { grid: { color: '#2a3150' }, ticks: { color: '#8b92b0' }, beginAtZero: true }
-                    }
+                    scales: { y: { beginAtZero: true } }
                 }
             });
         }
-
-        // --- TABELA ---
-
-        function renderTable(opps) {
-            const tbody = document.querySelector('#oppsTable tbody');
-            tbody.innerHTML = '';
-
-            // Pega as últimas 5 oportunidades
-            const latest = opps.slice(0, 10);
-
-            latest.forEach(op => {
-                const tr = document.createElement('tr');
-                
-                // Trata valores
-                const nome = op['Oportunidade'] || op['Nome'] || 'Sem nome';
-                const fase = op['Fase'] || '-';
-                let valor = op['Valor'] || op['Receita'] || 0;
-                
-                if (typeof valor === 'number') {
-                    valor = valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                }
-
-                // Badge de Status
-                let statusClass = 'status-aberta';
-                if (cleanStr(fase) === 'ganha') statusClass = 'status-ganha';
-                if (cleanStr(fase) === 'perdida') statusClass = 'status-perdida';
-
-                tr.innerHTML = `
-                    <td style="color: #fff; font-weight: 600;">${nome}</td>
-                    <td>${fase}</td>
-                    <td style="font-family: 'JetBrains Mono'">${valor}</td>
-                    <td><span class="status-badge ${statusClass}">${fase.toUpperCase()}</span></td>
-                `;
-                tbody.appendChild(tr);
-            });
-
-            if (opps.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px;">Nenhum dado encontrado no período.</td></tr>';
-            }
-        }
-
     </script>
 </body>
 </html>
