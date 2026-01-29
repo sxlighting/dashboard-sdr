@@ -754,9 +754,30 @@
         }
 
         function filterCallsByUser(data, userName) {
-            // Ajuste o nome do campo conforme sua planilha de ligações
-            return data.filter(item => item['SDR'] === userName || item['Responsável'] === userName);
+    return data.filter(item => {
+        const email = item['usuario_email'];
+        if (!email) return false;
+        
+        const emailLower = email.toLowerCase();
+        const emailPrefix = emailLower.split('@')[0].split('.')[0];
+        
+        // Mapeia emails para nomes
+        const mapping = {
+            'nathalia': 'Nathalia Lima',
+            'beatriz': 'Beatriz Santos',
+            'larissa': 'Larissa Portella',
+            'felipe': 'Felipe Mitterbach'
+        };
+        
+        for (let key in mapping) {
+            if (emailPrefix.includes(key) && mapping[key] === userName) {
+                return true;
+            }
         }
+        
+        return false;
+    });
+}
 
         // Update metrics
         function updateMetrics(leadboard, opportunities, calls) {
