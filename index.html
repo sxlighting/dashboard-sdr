@@ -672,7 +672,7 @@
                 const [leadboardData, opportunitiesData, callsData] = await Promise.all([
                     fetchSheetData(CONFIG.nectarSheetId, 'Leadboard'),
                     fetchSheetData(CONFIG.nectarSheetId, 'Oportunidades'),
-                    fetchSheetData(CONFIG.callsSheetId, 'Sheet1') // Ajuste o nome da aba se necessário
+                    fetchSheetData(CONFIG.callsSheetId, 'Ligacoes') // Ajuste o nome da aba se necessário
                 ]);
 
                 console.log('✅ Leadboard:', leadboardData.length, 'registros');
