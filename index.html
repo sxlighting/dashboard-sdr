@@ -1181,8 +1181,8 @@
                 return value > max ? value : max;
             }, 0);
 
-            const totalLeads = suspect + agendamento + qualificada;
-            const qualificationRate = totalLeads > 0 ? ((qualificada / totalLeads) * 100).toFixed(1) : 0;
+            const totalLeads = suspect + agendamento + qualificacao;
+            const qualificationRate = totalLeads > 0 ? ((qualificacao / totalLeads) * 100).toFixed(1) : 0;
 
             document.getElementById('totalPipelineValue').textContent = formatCurrency(totalValue);
             document.getElementById('avgTicket').textContent = formatCurrency(avgTicket);
