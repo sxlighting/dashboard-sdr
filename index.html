@@ -1516,9 +1516,13 @@
         }
 
         function applyFilters() {
+            console.log('🔍 === INICIANDO APLICAÇÃO DE FILTROS ===');
+            
             const period = document.getElementById('filterPeriod').value;
             const startDate = document.getElementById('filterStartDate').value;
             const endDate = document.getElementById('filterEndDate').value;
+
+            console.log('📋 Valores dos campos:', { period, startDate, endDate });
 
             let filterStartDate, filterEndDate;
 
@@ -1528,6 +1532,7 @@
                     filterStartDate.setHours(0, 0, 0, 0);
                     filterEndDate = new Date();
                     filterEndDate.setHours(23, 59, 59, 999);
+                    console.log('📅 Filtro: HOJE');
                     break;
                 case 'week':
                     filterEndDate = new Date();
@@ -1535,6 +1540,7 @@
                     filterStartDate = new Date();
                     filterStartDate.setDate(filterStartDate.getDate() - 7);
                     filterStartDate.setHours(0, 0, 0, 0);
+                    console.log('📅 Filtro: ÚLTIMOS 7 DIAS');
                     break;
                 case 'month':
                     filterEndDate = new Date();
@@ -1542,26 +1548,36 @@
                     filterStartDate = new Date();
                     filterStartDate.setDate(filterStartDate.getDate() - 30);
                     filterStartDate.setHours(0, 0, 0, 0);
+                    console.log('📅 Filtro: ÚLTIMOS 30 DIAS');
                     break;
                 case 'custom':
                     if (!startDate || !endDate) {
+                        console.warn('⚠️ Datas customizadas não preenchidas');
                         alert('Selecione as datas inicial e final');
                         return;
                     }
                     filterStartDate = new Date(startDate + 'T00:00:00');
                     filterEndDate = new Date(endDate + 'T23:59:59');
+                    console.log('📅 Filtro: PERSONALIZADO');
                     break;
                 default: // 'all'
+                    console.log('📅 Filtro: TODOS OS DADOS (resetando)');
                     filteredData = { ...allData };
                     updateAllMetrics();
                     updateCharts();
-                    console.log('📊 Filtros resetados - mostrando todos os dados');
+                    console.log('✅ Filtros resetados - mostrando todos os dados');
                     return;
             }
 
-            console.log('🔍 Filtrando dados:', {
+            console.log('🔍 Range de datas:', {
                 inicio: filterStartDate.toISOString(),
                 fim: filterEndDate.toISOString()
+            });
+
+            console.log('📊 Dados antes do filtro:', {
+                ligacoes: allData.calls.length,
+                leadboard: allData.leadboard.length,
+                oportunidades: allData.opportunities.length
             });
 
             // Aplicar filtros nas ligações (campo: data_hora_inicio)
@@ -1585,10 +1601,18 @@
                 return oppDate >= filterStartDate && oppDate <= filterEndDate;
             });
 
+            console.log('📊 Dados após filtro:', {
+                ligacoes: filteredData.calls.length,
+                leadboard: filteredData.leadboard.length,
+                oportunidades: filteredData.opportunities.length
+            });
+
+            console.log('🔄 Atualizando métricas e gráficos...');
             updateAllMetrics();
             updateCharts();
 
-            console.log('📊 Filtros aplicados:', {
+            console.log('✅ === FILTROS APLICADOS COM SUCESSO ===');
+            console.log('📊 Resumo final:', {
                 periodo: period,
                 inicio: filterStartDate.toLocaleDateString('pt-BR'),
                 fim: filterEndDate.toLocaleDateString('pt-BR'),
@@ -1663,28 +1687,27 @@
 
         // Event listeners para os filtros
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔧 Inicializando event listeners dos filtros');
+            
             // Listener para mudança no período
             const filterPeriod = document.getElementById('filterPeriod');
             if (filterPeriod) {
                 filterPeriod.addEventListener('change', function() {
-                    const customDates = document.getElementById('customDateRange');
-                    if (this.value === 'custom') {
-                        customDates.style.display = 'flex';
-                    } else {
-                        customDates.style.display = 'none';
-                        applyFilters();
-                    }
+                    console.log('📅 Período alterado para:', this.value);
+                    // Aplica filtros automaticamente quando muda o período
+                    applyFilters();
                 });
             }
 
-            // Listener para as datas customizadas
+            // Listeners para as datas (aplicam filtro quando ambas estão preenchidas)
             const filterStartDate = document.getElementById('filterStartDate');
             const filterEndDate = document.getElementById('filterEndDate');
             
             if (filterStartDate) {
                 filterStartDate.addEventListener('change', function() {
-                    if (document.getElementById('filterPeriod').value === 'custom' && 
-                        filterEndDate.value) {
+                    console.log('📅 Data inicial alterada:', this.value);
+                    // Se o período for "custom" e ambas as datas estiverem preenchidas, aplica
+                    if (filterPeriod.value === 'custom' && filterEndDate.value) {
                         applyFilters();
                     }
                 });
@@ -1692,18 +1715,15 @@
             
             if (filterEndDate) {
                 filterEndDate.addEventListener('change', function() {
-                    if (document.getElementById('filterPeriod').value === 'custom' && 
-                        filterStartDate.value) {
+                    console.log('📅 Data final alterada:', this.value);
+                    // Se o período for "custom" e ambas as datas estiverem preenchidas, aplica
+                    if (filterPeriod.value === 'custom' && filterStartDate.value) {
                         applyFilters();
                     }
                 });
             }
 
-            // Listener para o botão de resetar
-            const btnResetFilter = document.querySelector('.btn-reset-filter');
-            if (btnResetFilter) {
-                btnResetFilter.addEventListener('click', resetFilters);
-            }
+            console.log('✅ Event listeners dos filtros inicializados');
         });
 
         console.log('🚀 Dashboard SDR v4.0 - Versão Completa');
