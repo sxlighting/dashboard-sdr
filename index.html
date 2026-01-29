@@ -794,7 +794,7 @@
 
                     <div class="metric-card green">
                         <div class="metric-header">
-                            <div class="metric-label">Qualificado</div>
+                            <div class="metric-label">Qualificada</div>
                             <div class="metric-icon">⭐</div>
                         </div>
                         <div class="metric-value" id="totalQualificada">0</div>
@@ -866,7 +866,7 @@
                             <div class="stage-count" id="pipelineAgendamento">0</div>
                         </div>
                         <div class="pipeline-stage">
-                            <div class="stage-name">Qualificação</div>
+                            <div class="stage-name">Qualificada</div>
                             <div class="stage-count" id="pipelineQualificacao">0</div>
                         </div>
                         <div class="pipeline-stage">
@@ -1158,7 +1158,17 @@
             // Métricas de Leadboard por etapa
             const suspect = leadboard.filter(l => l['Leadboard: Etapa'] === 'Suspect').length;
             const agendamento = leadboard.filter(l => l['Leadboard: Etapa'] === 'Agendamento').length;
-            const qualificacao = leadboard.filter(l => l['Leadboard: Etapa'] === 'Qualificação').length;
+            const qualificacao = leadboard.filter(l => l['Leadboard: Fase'] === 'Qualificada').length;
+            
+            console.log('🎯 Debug Qualificados:');
+            console.log('Total leadboard:', leadboard.length);
+            console.log('Suspect:', suspect);
+            console.log('Agendamento:', agendamento);
+            console.log('Qualificada (Fase):', qualificacao);
+            if (leadboard.length > 0) {
+                console.log('Exemplo lead:', leadboard[0]);
+                console.log('Fases disponíveis:', [...new Set(leadboard.map(l => l['Leadboard: Fase']))]);
+            }
             
             document.getElementById('totalSuspect').textContent = suspect;
             document.getElementById('totalAgendamento').textContent = agendamento;
@@ -1190,10 +1200,15 @@
             document.getElementById('qualificationRate').textContent = `${qualificationRate}%`;
 
             // Pipeline
-            document.getElementById('pipelineSuspect').textContent = suspect;
-            document.getElementById('pipelineAgendamento').textContent = agendamento;
-            document.getElementById('pipelineQualificacao').textContent = qualificacao;
-            document.getElementById('pipelineOportunidades').textContent = openOpps.length;
+            const pipelineSuspect = filteredData.leadboard.filter(l => l['Leadboard: Etapa'] === 'Suspect').length;
+            const pipelineAgendamento = filteredData.leadboard.filter(l => l['Leadboard: Etapa'] === 'Agendamento').length;
+            const pipelineQualificacao = filteredData.leadboard.filter(l => l['Leadboard: Fase'] === 'Qualificada').length;
+            const pipelineOportunidades = filteredData.opportunities.filter(o => o.Fase === 'Aberta').length;
+
+            document.getElementById('pipelineSuspect').textContent = pipelineSuspect;
+            document.getElementById('pipelineAgendamento').textContent = pipelineAgendamento;
+            document.getElementById('pipelineQualificacao').textContent = pipelineQualificacao;
+            document.getElementById('pipelineOportunidades').textContent = pipelineOportunidades;
 
             console.log('📊 Métricas atualizadas');
         }
@@ -1259,16 +1274,16 @@
 
             // Gráfico de Distribuição do Leadboard
             const leadboardCtx = document.getElementById('leadboardChart').getContext('2d');
-            const suspect = filteredData.leadboard.filter(l => l['Leadboard: Etapa'] === 'Suspect').length;
-            const agendamento = filteredData.leadboard.filter(l => l['Leadboard: Etapa'] === 'Agendamento').length;
-            const qualificacao = filteredData.leadboard.filter(l => l['Leadboard: Etapa'] === 'Qualificação').length;
+            const suspectChart = filteredData.leadboard.filter(l => l['Leadboard: Etapa'] === 'Suspect').length;
+            const agendamentoChart = filteredData.leadboard.filter(l => l['Leadboard: Etapa'] === 'Agendamento').length;
+            const qualificacaoChart = filteredData.leadboard.filter(l => l['Leadboard: Fase'] === 'Qualificada').length;
 
             charts.leadboard = new Chart(leadboardCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Suspect', 'Agendamento', 'Qualificação'],
+                    labels: ['Suspect', 'Agendamento', 'Qualificada'],
                     datasets: [{
-                        data: [suspect, agendamento, qualificacao],
+                        data: [suspectChart, agendamentoChart, qualificacaoChart],
                         backgroundColor: ['#ffd60a', '#00d9ff', '#06ffa5'],
                         borderWidth: 0
                     }]
