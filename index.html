@@ -785,7 +785,7 @@
 
                     <div class="metric-card cyan">
                         <div class="metric-header">
-                            <div class="metric-label">Agendamento</div>
+                            <div class="metric-label">Agendada</div>
                             <div class="metric-icon">📅</div>
                         </div>
                         <div class="metric-value" id="totalAgendamento">0</div>
@@ -862,7 +862,7 @@
                             <div class="stage-count" id="pipelineSuspect">0</div>
                         </div>
                         <div class="pipeline-stage">
-                            <div class="stage-name">Agendamento</div>
+                            <div class="stage-name">Agendada</div>
                             <div class="stage-count" id="pipelineAgendamento">0</div>
                         </div>
                         <div class="pipeline-stage">
@@ -1175,15 +1175,15 @@
             document.getElementById('avgTime').textContent = `${avgTime}s`;
             document.getElementById('conversionRate').textContent = `${conversionRate}%`;
 
-            // Métricas de Leadboard por etapa
+            // Métricas de Leadboard por etapa/fase
             const suspect = leadboard.filter(l => l['Leadboard: Etapa'] === 'Suspect').length;
-            const agendamento = leadboard.filter(l => l['Leadboard: Etapa'] === 'Agendamento').length;
+            const agendamento = leadboard.filter(l => l['Leadboard: Fase'] === 'Agendada').length;
             const qualificacao = leadboard.filter(l => l['Leadboard: Fase'] === 'Qualificada').length;
             
             console.log('🎯 Debug Qualificados:');
             console.log('Total leadboard:', leadboard.length);
             console.log('Suspect:', suspect);
-            console.log('Agendamento:', agendamento);
+            console.log('Agendamento (Fase Agendada):', agendamento);
             console.log('Qualificada (Fase):', qualificacao);
             if (leadboard.length > 0) {
                 console.log('Exemplo lead:', leadboard[0]);
@@ -1194,8 +1194,8 @@
             document.getElementById('totalAgendamento').textContent = agendamento;
             document.getElementById('totalQualificada').textContent = qualificacao;
 
-            // Oportunidades
-            const openOpps = opportunities.filter(o => o.Fase === 'Aberta');
+            // Oportunidades (excluindo PROSPECT)
+            const openOpps = opportunities.filter(o => o.Fase === 'Aberta' && o['Funil: etapa'] !== 'PROSPECT');
             document.getElementById('totalOpportunities').textContent = openOpps.length;
 
             // Métricas Financeiras
@@ -1221,9 +1221,9 @@
 
             // Pipeline
             const pipelineSuspect = filteredData.leadboard.filter(l => l['Leadboard: Etapa'] === 'Suspect').length;
-            const pipelineAgendamento = filteredData.leadboard.filter(l => l['Leadboard: Etapa'] === 'Agendamento').length;
+            const pipelineAgendamento = filteredData.leadboard.filter(l => l['Leadboard: Fase'] === 'Agendada').length;
             const pipelineQualificacao = filteredData.leadboard.filter(l => l['Leadboard: Fase'] === 'Qualificada').length;
-            const pipelineOportunidades = filteredData.opportunities.filter(o => o.Fase === 'Aberta').length;
+            const pipelineOportunidades = filteredData.opportunities.filter(o => o.Fase === 'Aberta' && o['Funil: etapa'] !== 'PROSPECT').length;
 
             document.getElementById('pipelineSuspect').textContent = pipelineSuspect;
             document.getElementById('pipelineAgendamento').textContent = pipelineAgendamento;
@@ -1295,13 +1295,13 @@
             // Gráfico de Distribuição do Leadboard
             const leadboardCtx = document.getElementById('leadboardChart').getContext('2d');
             const suspectChart = filteredData.leadboard.filter(l => l['Leadboard: Etapa'] === 'Suspect').length;
-            const agendamentoChart = filteredData.leadboard.filter(l => l['Leadboard: Etapa'] === 'Agendamento').length;
+            const agendamentoChart = filteredData.leadboard.filter(l => l['Leadboard: Fase'] === 'Agendada').length;
             const qualificacaoChart = filteredData.leadboard.filter(l => l['Leadboard: Fase'] === 'Qualificada').length;
 
             charts.leadboard = new Chart(leadboardCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Suspect', 'Agendamento', 'Qualificada'],
+                    labels: ['Suspect', 'Agendada', 'Qualificada'],
                     datasets: [{
                         data: [suspectChart, agendamentoChart, qualificacaoChart],
                         backgroundColor: ['#ffd60a', '#00d9ff', '#06ffa5'],
@@ -1560,28 +1560,28 @@
             }
 
             console.log('🔍 Filtrando dados:', {
-                inicio: filterStartDate ? filterStartDate.toISOString() : 'N/A',
-                fim: filterEndDate ? filterEndDate.toISOString() : 'N/A'
+                inicio: filterStartDate.toISOString(),
+                fim: filterEndDate.toISOString()
             });
 
-            // Aplicar filtros nas ligações
+            // Aplicar filtros nas ligações (campo: data_hora)
             filteredData.calls = allData.calls.filter(call => {
-                if (!call['data_hora_inicio']) return false;
-                const callDate = new Date(call['data_hora_inicio']);
+                if (!call['data_hora']) return false;
+                const callDate = new Date(call['data_hora']);
                 return callDate >= filterStartDate && callDate <= filterEndDate;
             });
 
-            // Aplicar filtros no leadboard
+            // Aplicar filtros no leadboard (campo: Leadboard: Data criação)
             filteredData.leadboard = allData.leadboard.filter(lead => {
-                if (!lead['Leadboard: Data Criação']) return true; // Incluir se não tiver data
-                const leadDate = new Date(lead['Leadboard: Data Criação']);
+                if (!lead['Leadboard: Data criação']) return true; // Incluir se não tiver data
+                const leadDate = new Date(lead['Leadboard: Data criação']);
                 return leadDate >= filterStartDate && leadDate <= filterEndDate;
             });
 
-            // Aplicar filtros nas oportunidades
+            // Aplicar filtros nas oportunidades (campo: Data criação)
             filteredData.opportunities = allData.opportunities.filter(opp => {
-                if (!opp['Data Criação']) return true; // Incluir se não tiver data
-                const oppDate = new Date(opp['Data Criação']);
+                if (!opp['Data criação']) return true; // Incluir se não tiver data
+                const oppDate = new Date(opp['Data criação']);
                 return oppDate >= filterStartDate && oppDate <= filterEndDate;
             });
 
