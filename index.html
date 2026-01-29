@@ -395,6 +395,8 @@
         .stat-icon.conversion { background: rgba(255, 107, 53, 0.1); color: var(--accent-orange); }
         .stat-icon.leads { background: rgba(255, 214, 10, 0.1); color: var(--accent-yellow); }
         .stat-icon.money { background: rgba(6, 255, 165, 0.1); color: var(--accent-green); }
+		.stat-icon.waiting { background: rgba(255, 214, 10, 0.1); color: var(--accent-yellow); }
+		.stat-icon.qualified { background: rgba(6, 255, 165, 0.1); color: var(--accent-green); }
 
         .stat-label {
             color: var(--text-secondary);
@@ -556,6 +558,20 @@
                         <div class="stat-detail">Abertas</div>
                     </div>
                 </div>
+					
+					<div class="stat-card">
+						<div class="stat-icon waiting">⏳</div>
+						<div class="stat-label">Aguardando Ativação</div>
+						<div class="stat-value" id="totalAgendamento">0</div>
+						<div class="stat-detail">Etapa: Agendamento</div>
+				</div>
+
+					<div class="stat-card">
+						<div class="stat-icon qualified">✅</div>
+						<div class="stat-label">Qualificado</div>
+						<div class="stat-value" id="totalQualificada">0</div>
+						<div class="stat-detail">Etapa: Qualificada</div>
+				</div>
 
                 <!-- Mais conteúdo será adicionado aqui -->
             </div>
@@ -572,7 +588,7 @@
                 'Felipe Mitterbach': 'sdr2025'
             },
             // IDs das planilhas (serão configurados pelo usuário)
-            nectarSheetId: localStorage.getItem('nectarSheetId') || '',
+            nectarSheetId: localStorage.getItem('nectarSheetId') || '17g2rGIZUzRRNh4_ez2VooykpVt8yIQjIcL3He_hoOOw',
             callsSheetId: localStorage.getItem('callsSheetId') || '1Hmcq0ihu1bpwwM-MuUzAYULiilH82qj7xFyI-VnyNAo'
         };
 
@@ -783,13 +799,21 @@
         function updateMetrics(leadboard, opportunities, calls) {
             // Ligações
             const totalCalls = calls.length;
-            const effectiveCalls = calls.filter(c => {
-				const duracao = parseInt(c['duracao_segundos']) || 0;
-				return duracao > 45;
-			}).length;
-            const avgTime = totalCalls > 0 
-                ? Math.round(calls.reduce((sum, c) => sum + (parseInt(c['duracao_segundos']) || 0), 0) / totalCalls)
+            
+            // Filtra ligações efetivas
+            const effectiveCallsList = calls.filter(c => {
+                const duracao = parseInt(c['duracao_segundos']) || 0;
+                return duracao > 45;
+            });
+            
+            const effectiveCalls = effectiveCallsList.length;
+            
+            // Tempo médio APENAS das efetivas
+            const avgTime = effectiveCalls > 0 
+                ? Math.round(effectiveCallsList.reduce((sum, c) => 
+                    sum + (parseInt(c['duracao_segundos']) || 0), 0) / effectiveCalls)
                 : 0;
+            
             const conversionRate = totalCalls > 0 ? ((effectiveCalls / totalCalls) * 100).toFixed(1) : 0;
 
             document.getElementById('totalCalls').textContent = totalCalls;
@@ -797,12 +821,30 @@
             document.getElementById('avgTime').textContent = `${avgTime}s`;
             document.getElementById('conversionRate').textContent = `${conversionRate}%`;
 
-            // Leadboard
-            document.getElementById('totalLeads').textContent = leadboard.length;
+            // Leadboard - por etapa específica
+            const suspect = leadboard.filter(l => l['Leadboard: Etapa'] === 'Suspect').length;
+            const agendamento = leadboard.filter(l => l['Leadboard: Etapa'] === 'Agendamento').length;
+            const qualificada = leadboard.filter(l => l['Leadboard: Etapa'] === 'Qualificada').length;
+            
+            document.getElementById('totalLeads').textContent = suspect; // Mantém compatibilidade
+            
+            // Se os elementos existirem, atualiza (caso já tenha adicionado os novos cards)
+            const totalSuspectEl = document.getElementById('totalSuspect');
+            const totalAgendamentoEl = document.getElementById('totalAgendamento');
+            const totalQualificadaEl = document.getElementById('totalQualificada');
+            
+            if (totalSuspectEl) totalSuspectEl.textContent = suspect;
+            if (totalAgendamentoEl) totalAgendamentoEl.textContent = agendamento;
+            if (totalQualificadaEl) totalQualificadaEl.textContent = qualificada;
 
-            // Oportunidades
+            // Oportunidades - conta TODAS as abertas (não só as em fases específicas)
             const openOpps = opportunities.filter(o => o.Fase === 'Aberta');
             document.getElementById('totalOpportunities').textContent = openOpps.length;
+            
+            console.log('📊 Debug Oportunidades:');
+            console.log('Total filtradas:', opportunities.length);
+            console.log('Abertas:', openOpps.length);
+            console.log('Exemplo:', openOpps[0]);
         }
 
         // Get last update
