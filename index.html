@@ -1564,24 +1564,24 @@
                 fim: filterEndDate.toISOString()
             });
 
-            // Aplicar filtros nas ligações (campo: data_hora)
+            // Aplicar filtros nas ligações (campo: data_hora_inicio)
             filteredData.calls = allData.calls.filter(call => {
-                if (!call['data_hora']) return false;
-                const callDate = new Date(call['data_hora']);
+                if (!call['data_hora_inicio']) return false;
+                const callDate = new Date(call['data_hora_inicio']);
                 return callDate >= filterStartDate && callDate <= filterEndDate;
             });
 
-            // Aplicar filtros no leadboard (campo: Leadboard: Data criação)
+            // Aplicar filtros no leadboard (campo: Leadboard: Data Criação)
             filteredData.leadboard = allData.leadboard.filter(lead => {
-                if (!lead['Leadboard: Data criação']) return true; // Incluir se não tiver data
-                const leadDate = new Date(lead['Leadboard: Data criação']);
+                if (!lead['Leadboard: Data Criação']) return true; // Incluir se não tiver data
+                const leadDate = new Date(lead['Leadboard: Data Criação']);
                 return leadDate >= filterStartDate && leadDate <= filterEndDate;
             });
 
-            // Aplicar filtros nas oportunidades (campo: Data criação)
+            // Aplicar filtros nas oportunidades (campo: Data Criação)
             filteredData.opportunities = allData.opportunities.filter(opp => {
-                if (!opp['Data criação']) return true; // Incluir se não tiver data
-                const oppDate = new Date(opp['Data criação']);
+                if (!opp['Data Criação']) return true; // Incluir se não tiver data
+                const oppDate = new Date(opp['Data Criação']);
                 return oppDate >= filterStartDate && oppDate <= filterEndDate;
             });
 
@@ -1660,6 +1660,51 @@
                 document.getElementById('lastUpdate').textContent = 'Não disponível';
             }
         }
+
+        // Event listeners para os filtros
+        document.addEventListener('DOMContentLoaded', function() {
+            // Listener para mudança no período
+            const filterPeriod = document.getElementById('filterPeriod');
+            if (filterPeriod) {
+                filterPeriod.addEventListener('change', function() {
+                    const customDates = document.getElementById('customDateRange');
+                    if (this.value === 'custom') {
+                        customDates.style.display = 'flex';
+                    } else {
+                        customDates.style.display = 'none';
+                        applyFilters();
+                    }
+                });
+            }
+
+            // Listener para as datas customizadas
+            const filterStartDate = document.getElementById('filterStartDate');
+            const filterEndDate = document.getElementById('filterEndDate');
+            
+            if (filterStartDate) {
+                filterStartDate.addEventListener('change', function() {
+                    if (document.getElementById('filterPeriod').value === 'custom' && 
+                        filterEndDate.value) {
+                        applyFilters();
+                    }
+                });
+            }
+            
+            if (filterEndDate) {
+                filterEndDate.addEventListener('change', function() {
+                    if (document.getElementById('filterPeriod').value === 'custom' && 
+                        filterStartDate.value) {
+                        applyFilters();
+                    }
+                });
+            }
+
+            // Listener para o botão de resetar
+            const btnResetFilter = document.querySelector('.btn-reset-filter');
+            if (btnResetFilter) {
+                btnResetFilter.addEventListener('click', resetFilters);
+            }
+        });
 
         console.log('🚀 Dashboard SDR v4.0 - Versão Completa');
         console.log('✅ Gráficos interativos');
