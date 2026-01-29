@@ -1102,14 +1102,34 @@
         }
 
         function filterLeadboardByUser(data, userName) {
-            return data.filter(item => item['Leadboard: Responsável'] === userName);
+            console.log('🔍 Filtrando Leadboard para:', userName);
+            console.log('Total de registros:', data.length);
+            
+            // Verificar quais responsáveis existem
+            const responsaveis = [...new Set(data.map(item => item['Leadboard: Responsável']))];
+            console.log('Responsáveis encontrados:', responsaveis);
+            
+            const filtered = data.filter(item => item['Leadboard: Responsável'] === userName);
+            console.log('Registros filtrados:', filtered.length);
+            
+            return filtered;
         }
 
         function filterOpportunitiesByUser(data, userName) {
-            return data.filter(item => {
+            console.log('🔍 Filtrando Oportunidades para:', userName);
+            console.log('Total de registros:', data.length);
+            
+            // Verificar quais corresponsáveis existem
+            const corresponsaveis = [...new Set(data.map(item => item['Corresponsáveis: Usuários']).filter(c => c))];
+            console.log('Primeiros 10 corresponsáveis:', corresponsaveis.slice(0, 10));
+            
+            const filtered = data.filter(item => {
                 const corresponsaveis = item['Corresponsáveis: Usuários'] || '';
                 return corresponsaveis.includes(userName);
             });
+            
+            console.log('Registros filtrados:', filtered.length);
+            return filtered;
         }
 
         function filterCallsByUser(data, userName) {
