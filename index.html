@@ -49,7 +49,6 @@
             z-index: 0;
         }
 
-        /* Login Screen - mesmo estilo anterior */
         .login-container {
             display: flex;
             align-items: center;
@@ -162,62 +161,6 @@
             text-align: center;
         }
 
-        /* Config Panel */
-        .config-panel {
-            margin-top: 30px;
-            padding-top: 30px;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .config-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            margin-bottom: 16px;
-            text-align: center;
-        }
-
-        .config-input {
-            margin-bottom: 16px;
-        }
-
-        .config-input label {
-            display: block;
-            font-size: 12px;
-            color: var(--text-secondary);
-            margin-bottom: 6px;
-        }
-
-        .config-input input {
-            width: 100%;
-            padding: 10px 12px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            color: var(--text-primary);
-            font-size: 13px;
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .btn-save-config {
-            width: 100%;
-            padding: 10px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            color: var(--text-primary);
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-family: 'Lexend', sans-serif;
-        }
-
-        .btn-save-config:hover {
-            border-color: var(--accent-green);
-            background: rgba(6, 255, 165, 0.1);
-        }
-
-        /* Dashboard - reuso do código anterior */
         .dashboard {
             display: none;
             min-height: 100vh;
@@ -345,7 +288,6 @@
             color: var(--text-secondary);
         }
 
-        /* Stats Grid e outros componentes mantidos do código anterior */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -395,8 +337,8 @@
         .stat-icon.conversion { background: rgba(255, 107, 53, 0.1); color: var(--accent-orange); }
         .stat-icon.leads { background: rgba(255, 214, 10, 0.1); color: var(--accent-yellow); }
         .stat-icon.money { background: rgba(6, 255, 165, 0.1); color: var(--accent-green); }
-		.stat-icon.waiting { background: rgba(255, 214, 10, 0.1); color: var(--accent-yellow); }
-		.stat-icon.qualified { background: rgba(6, 255, 165, 0.1); color: var(--accent-green); }
+        .stat-icon.waiting { background: rgba(255, 214, 10, 0.1); color: var(--accent-yellow); }
+        .stat-icon.qualified { background: rgba(6, 255, 165, 0.1); color: var(--accent-green); }
 
         .stat-label {
             color: var(--text-secondary);
@@ -420,7 +362,6 @@
             font-size: 12px;
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
             .dashboard-header {
                 flex-direction: column;
@@ -440,7 +381,6 @@
 <body>
     <div class="bg-gradient"></div>
 
-    <!-- Login Screen -->
     <div class="login-container" id="loginScreen">
         <div class="login-box">
             <div class="login-header">
@@ -465,24 +405,9 @@
                 </div>
                 <button type="submit" class="btn-login">Entrar</button>
             </form>
-
-            <!-- Painel de Configuração -->
-            <div class="config-panel">
-                <div class="config-title">⚙️ Configuração das Planilhas</div>
-                <div class="config-input">
-                    <label>ID da Planilha Nectar (Leadboard + Oportunidades)</label>
-                    <input type="text" id="nectarSheetId" placeholder="Cole o ID da planilha aqui">
-                </div>
-                <div class="config-input">
-                    <label>ID da Planilha de Ligações (55PBX)</label>
-                    <input type="text" id="callsSheetId" value="1Hmcq0ihu1bpwwM-MuUzAYULiilH82qj7xFyI-VnyNAo">
-                </div>
-                <button class="btn-save-config" onclick="salvarConfig()">💾 Salvar Configuração</button>
-            </div>
         </div>
     </div>
 
-    <!-- Dashboard -->
     <div class="dashboard" id="dashboardScreen">
         <div class="dashboard-header">
             <div class="header-left">
@@ -505,7 +430,6 @@
             </div>
 
             <div id="dashboardData" style="display: none;">
-                <!-- Info Banner -->
                 <div class="info-banner">
                     <div class="info-banner-icon">📊</div>
                     <div class="info-banner-text">
@@ -514,7 +438,6 @@
                     </div>
                 </div>
 
-                <!-- Stats Grid -->
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-icon calls">📞</div>
@@ -534,7 +457,7 @@
                         <div class="stat-icon time">⏱</div>
                         <div class="stat-label">Tempo Médio</div>
                         <div class="stat-value" id="avgTime">0s</div>
-                        <div class="stat-detail">Por ligação</div>
+                        <div class="stat-detail">Ligações efetivas</div>
                     </div>
 
                     <div class="stat-card">
@@ -546,9 +469,23 @@
 
                     <div class="stat-card">
                         <div class="stat-icon leads">🎯</div>
-                        <div class="stat-label">Leads no Pipeline</div>
-                        <div class="stat-value" id="totalLeads">0</div>
-                        <div class="stat-detail">Em qualificação</div>
+                        <div class="stat-label">Em Qualificação</div>
+                        <div class="stat-value" id="totalSuspect">0</div>
+                        <div class="stat-detail">Etapa: Suspect</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon waiting">⏳</div>
+                        <div class="stat-label">Aguardando Ativação</div>
+                        <div class="stat-value" id="totalAgendamento">0</div>
+                        <div class="stat-detail">Etapa: Agendamento</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon qualified">✅</div>
+                        <div class="stat-label">Qualificado</div>
+                        <div class="stat-value" id="totalQualificada">0</div>
+                        <div class="stat-detail">Etapa: Qualificada</div>
                     </div>
 
                     <div class="stat-card">
@@ -558,28 +495,11 @@
                         <div class="stat-detail">Abertas</div>
                     </div>
                 </div>
-					
-					<div class="stat-card">
-						<div class="stat-icon waiting">⏳</div>
-						<div class="stat-label">Aguardando Ativação</div>
-						<div class="stat-value" id="totalAgendamento">0</div>
-						<div class="stat-detail">Etapa: Agendamento</div>
-				</div>
-
-					<div class="stat-card">
-						<div class="stat-icon qualified">✅</div>
-						<div class="stat-label">Qualificado</div>
-						<div class="stat-value" id="totalQualificada">0</div>
-						<div class="stat-detail">Etapa: Qualificada</div>
-				</div>
-
-                <!-- Mais conteúdo será adicionado aqui -->
             </div>
         </div>
     </div>
 
     <script>
-        // Configurações
         const CONFIG = {
             users: {
                 'Nathalia Lima': 'sdr2025',
@@ -587,39 +507,24 @@
                 'Larissa Portella': 'sdr2025',
                 'Felipe Mitterbach': 'sdr2025'
             },
-            // IDs das planilhas (serão configurados pelo usuário)
-            nectarSheetId: localStorage.getItem('nectarSheetId') || '17g2rGIZUzRRNh4_ez2VooykpVt8yIQjIcL3He_hoOOw',
-            callsSheetId: localStorage.getItem('callsSheetId') || '1Hmcq0ihu1bpwwM-MuUzAYULiilH82qj7xFyI-VnyNAo'
+            emailMapping: {
+                'nathalia': 'Nathalia Lima',
+                'beatriz': 'Beatriz Santos',
+                'larissa': 'Larissa Lima',
+                'felipe': 'Felipe Mitterbach'
+            },
+            nectarSheetId: '17g2rGIZUzRRNh4_ez2VooykpVt8yIQjIcL3He_hoOOw',
+            callsSheetId: '1Hmcq0ihu1bpwwM-MuUzAYULiilH82qj7xFyI-VnyNAo',
+            callsSheetName: 'Ligacoes'
         };
 
         let currentUser = null;
+        let allData = {
+            leadboard: [],
+            opportunities: [],
+            calls: []
+        };
 
-        // Carrega configurações salvas
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('nectarSheetId').value = CONFIG.nectarSheetId;
-            document.getElementById('callsSheetId').value = CONFIG.callsSheetId;
-        });
-
-        // Salvar configuração
-        function salvarConfig() {
-            const nectarId = document.getElementById('nectarSheetId').value.trim();
-            const callsId = document.getElementById('callsSheetId').value.trim();
-
-            if (!nectarId) {
-                alert('Por favor, preencha o ID da planilha Nectar');
-                return;
-            }
-
-            localStorage.setItem('nectarSheetId', nectarId);
-            localStorage.setItem('callsSheetId', callsId);
-
-            CONFIG.nectarSheetId = nectarId;
-            CONFIG.callsSheetId = callsId;
-
-            alert('✅ Configuração salva com sucesso!');
-        }
-
-        // Login Handler
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const userName = document.getElementById('userSelect').value;
@@ -628,13 +533,6 @@
 
             if (!userName) {
                 errorMsg.textContent = 'Por favor, selecione seu nome';
-                errorMsg.style.display = 'block';
-                return;
-            }
-
-            // Verifica se as planilhas estão configuradas
-            if (!CONFIG.nectarSheetId) {
-                errorMsg.textContent = 'Configure o ID da planilha Nectar primeiro';
                 errorMsg.style.display = 'block';
                 return;
             }
@@ -649,7 +547,6 @@
             }
         });
 
-        // Logout Handler
         document.getElementById('logoutBtn').addEventListener('click', function() {
             currentUser = null;
             document.getElementById('loginScreen').style.display = 'flex';
@@ -658,7 +555,6 @@
             document.getElementById('userSelect').value = '';
         });
 
-        // Show Dashboard
         function showDashboard() {
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('dashboardScreen').classList.add('active');
@@ -675,7 +571,6 @@
             loadDashboardData();
         }
 
-        // Load Dashboard Data from Google Sheets
         async function loadDashboardData() {
             document.getElementById('loadingState').style.display = 'block';
             document.getElementById('dashboardData').style.display = 'none';
@@ -684,18 +579,16 @@
             console.log('Usuário:', currentUser);
 
             try {
-                // Busca dados das 3 planilhas
                 const [leadboardData, opportunitiesData, callsData] = await Promise.all([
                     fetchSheetData(CONFIG.nectarSheetId, 'Leadboard'),
                     fetchSheetData(CONFIG.nectarSheetId, 'Oportunidades'),
-                    fetchSheetData(CONFIG.callsSheetId, 'Ligacoes') // Ajuste o nome da aba se necessário
+                    fetchSheetData(CONFIG.callsSheetId, CONFIG.callsSheetName)
                 ]);
 
                 console.log('✅ Leadboard:', leadboardData.length, 'registros');
                 console.log('✅ Oportunidades:', opportunitiesData.length, 'registros');
                 console.log('✅ Ligações:', callsData.length, 'registros');
 
-                // Filtra dados do SDR logado
                 const myLeadboard = filterLeadboardByUser(leadboardData, currentUser);
                 const myOpportunities = filterOpportunitiesByUser(opportunitiesData, currentUser);
                 const myCalls = filterCallsByUser(callsData, currentUser);
@@ -705,10 +598,7 @@
                 console.log('  - Oportunidades:', myOpportunities.length);
                 console.log('  - Ligações:', myCalls.length);
 
-                // Atualiza métricas
                 updateMetrics(myLeadboard, myOpportunities, myCalls);
-
-                // Busca última atualização
                 await getLastUpdate();
 
                 document.getElementById('loadingState').style.display = 'none';
@@ -718,13 +608,11 @@
 
             } catch (error) {
                 console.error('❌ Erro ao carregar dados:', error);
-                alert('Erro ao carregar dados. Verifique:\n1. IDs das planilhas estão corretos\n2. Planilhas estão públicas ou compartilhadas\n3. Nomes das abas estão corretos');
-                
+                alert('Erro ao carregar dados. Verifique as configurações.');
                 document.getElementById('loadingState').style.display = 'none';
             }
         }
 
-        // Fetch data from Google Sheets
         async function fetchSheetData(sheetId, sheetName) {
             const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
             
@@ -734,11 +622,9 @@
                 const response = await fetch(url);
                 const text = await response.text();
                 
-                // Remove o prefixo do Google Sheets
                 const jsonText = text.substring(47).slice(0, -2);
                 const data = JSON.parse(jsonText);
                 
-                // Converte para array de objetos
                 const cols = data.table.cols.map(col => col.label || col.id);
                 const rows = data.table.rows.map(row => {
                     const obj = {};
@@ -757,7 +643,6 @@
             }
         }
 
-        // Filter functions
         function filterLeadboardByUser(data, userName) {
             return data.filter(item => item['Leadboard: Responsável'] === userName);
         }
@@ -770,37 +655,27 @@
         }
 
         function filterCallsByUser(data, userName) {
-    return data.filter(item => {
-        const email = item['usuario_email'];
-        if (!email) return false;
-        
-        const emailLower = email.toLowerCase();
-        const emailPrefix = emailLower.split('@')[0].split('.')[0];
-        
-        // Mapeia emails para nomes
-        const mapping = {
-            'nathalia': 'Nathalia Lima',
-            'beatriz': 'Beatriz Santos',
-            'larissa': 'Larissa Portella',
-            'felipe': 'Felipe Mitterbach'
-        };
-        
-        for (let key in mapping) {
-            if (emailPrefix.includes(key) && mapping[key] === userName) {
-                return true;
-            }
+            return data.filter(item => {
+                const email = item['usuario_email'];
+                if (!email) return false;
+                
+                const emailLower = email.toLowerCase();
+                const emailPrefix = emailLower.split('@')[0].split('.')[0];
+                
+                for (let key in CONFIG.emailMapping) {
+                    if (emailPrefix.includes(key) && CONFIG.emailMapping[key] === userName) {
+                        return true;
+                    }
+                }
+                
+                return false;
+            });
         }
-        
-        return false;
-    });
-}
 
-        // Update metrics
         function updateMetrics(leadboard, opportunities, calls) {
             // Ligações
             const totalCalls = calls.length;
             
-            // Filtra ligações efetivas
             const effectiveCallsList = calls.filter(c => {
                 const duracao = parseInt(c['duracao_segundos']) || 0;
                 return duracao > 45;
@@ -821,38 +696,34 @@
             document.getElementById('avgTime').textContent = `${avgTime}s`;
             document.getElementById('conversionRate').textContent = `${conversionRate}%`;
 
-            // Leadboard - por etapa específica
+            // Leadboard por etapa
             const suspect = leadboard.filter(l => l['Leadboard: Etapa'] === 'Suspect').length;
             const agendamento = leadboard.filter(l => l['Leadboard: Etapa'] === 'Agendamento').length;
             const qualificada = leadboard.filter(l => l['Leadboard: Etapa'] === 'Qualificada').length;
             
-            document.getElementById('totalLeads').textContent = suspect; // Mantém compatibilidade
-            
-            // Se os elementos existirem, atualiza (caso já tenha adicionado os novos cards)
-            const totalSuspectEl = document.getElementById('totalSuspect');
-            const totalAgendamentoEl = document.getElementById('totalAgendamento');
-            const totalQualificadaEl = document.getElementById('totalQualificada');
-            
-            if (totalSuspectEl) totalSuspectEl.textContent = suspect;
-            if (totalAgendamentoEl) totalAgendamentoEl.textContent = agendamento;
-            if (totalQualificadaEl) totalQualificadaEl.textContent = qualificada;
+            document.getElementById('totalSuspect').textContent = suspect;
+            document.getElementById('totalAgendamento').textContent = agendamento;
+            document.getElementById('totalQualificada').textContent = qualificada;
 
-            // Oportunidades - conta TODAS as abertas (não só as em fases específicas)
+            // Oportunidades
             const openOpps = opportunities.filter(o => o.Fase === 'Aberta');
             document.getElementById('totalOpportunities').textContent = openOpps.length;
             
             console.log('📊 Debug Oportunidades:');
             console.log('Total filtradas:', opportunities.length);
             console.log('Abertas:', openOpps.length);
-            console.log('Exemplo:', openOpps[0]);
+            if (openOpps.length > 0) {
+                console.log('Exemplo:', openOpps[0]);
+            }
         }
 
-        // Get last update
         async function getLastUpdate() {
             try {
                 const data = await fetchSheetData(CONFIG.nectarSheetId, 'Controle');
                 if (data.length > 0 && data[0]['Última Atualização']) {
-                    document.getElementById('lastUpdate').textContent = data[0]['Última Atualização'];
+                    const lastUpdate = data[0]['Última Atualização'];
+                    document.getElementById('lastUpdate').textContent = 
+                        typeof lastUpdate === 'string' ? lastUpdate : new Date(lastUpdate).toLocaleString('pt-BR');
                 } else {
                     document.getElementById('lastUpdate').textContent = 'Não disponível';
                 }
@@ -861,7 +732,7 @@
             }
         }
 
-        console.log('🚀 Dashboard SDR v2.0 - Google Sheets Edition');
+        console.log('🚀 Dashboard SDR v3.0 - Versão Final');
         console.log('Senha padrão: sdr2025');
     </script>
 </body>
