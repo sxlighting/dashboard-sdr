@@ -239,84 +239,83 @@
             margin: 0 auto;
         }
 
-        /* Filtros de Data */
-        .filters-section {
+        /* Tabelas de Produtividade */
+        .productivity-section {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 16px;
-            padding: 24px;
+            padding: 30px;
             margin-bottom: 30px;
-            display: flex;
-            gap: 20px;
-            align-items: flex-end;
-            flex-wrap: wrap;
         }
 
-        .filter-group {
-            flex: 1;
-            min-width: 200px;
+        .productivity-section h2 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: var(--text-primary);
         }
 
-        .filter-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 13px;
+        .productivity-tables {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .productivity-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .productivity-card h3 {
+            font-size: 16px;
             font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--accent-cyan);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .productivity-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .productivity-stat {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .productivity-stat:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            font-size: 14px;
             color: var(--text-secondary);
         }
 
-        .filter-group input,
-        .filter-group select {
-            width: 100%;
-            padding: 12px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
+        .stat-value {
+            font-size: 18px;
+            font-weight: 700;
             color: var(--text-primary);
-            font-size: 14px;
-            font-family: 'Lexend', sans-serif;
         }
 
-        .filter-actions {
-            display: flex;
-            gap: 10px;
+        .stat-value.highlight {
+            color: var(--accent-green);
         }
 
-        .btn-filter {
-            padding: 12px 24px;
-            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
-            border: none;
-            border-radius: 8px;
-            color: white;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-            font-family: 'Lexend', sans-serif;
+        .stat-value.secondary {
+            color: var(--accent-cyan);
         }
 
-        .btn-filter:hover {
-            transform: translateY(-2px);
-        }
-
-        .btn-reset {
-            padding: 12px 24px;
-            background: transparent;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            color: var(--text-primary);
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Lexend', sans-serif;
-        }
-
-        .btn-reset:hover {
-            border-color: var(--accent-orange);
-            color: var(--accent-orange);
-        }
-
+        /* Métricas Grid */
         .metrics-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -708,29 +707,86 @@
 
             <!-- Dashboard Data -->
             <div id="dashboardData" style="display: none;">
-                <!-- Filtros de Data -->
-                <div class="filters-section">
-                    <div class="filter-group">
-                        <label>Data Inicial</label>
-                        <input type="date" id="filterStartDate">
-                    </div>
-                    <div class="filter-group">
-                        <label>Data Final</label>
-                        <input type="date" id="filterEndDate">
-                    </div>
-                    <div class="filter-group">
-                        <label>Período</label>
-                        <select id="filterPeriod">
-                            <option value="all">Todos os dados</option>
-                            <option value="today">Hoje</option>
-                            <option value="week">Últimos 7 dias</option>
-                            <option value="month">Últimos 30 dias</option>
-                            <option value="custom">Personalizado</option>
-                        </select>
-                    </div>
-                    <div class="filter-actions">
-                        <button class="btn-filter" onclick="applyFilters()">Aplicar</button>
-                        <button class="btn-reset" onclick="resetFilters()">Resetar</button>
+                <!-- Tabelas de Produtividade -->
+                <div class="productivity-section">
+                    <h2>📊 Produtividade de Ligações</h2>
+                    <div class="productivity-tables">
+                        <!-- Hoje -->
+                        <div class="productivity-card">
+                            <h3>📅 Hoje</h3>
+                            <div class="productivity-stats">
+                                <div class="productivity-stat">
+                                    <span class="stat-label">Total de Ligações</span>
+                                    <span class="stat-value secondary" id="todayTotal">0</span>
+                                </div>
+                                <div class="productivity-stat">
+                                    <span class="stat-label">Ligações Efetivas</span>
+                                    <span class="stat-value highlight" id="todayEffective">0</span>
+                                </div>
+                                <div class="productivity-stat">
+                                    <span class="stat-label">Taxa de Conversão</span>
+                                    <span class="stat-value" id="todayRate">0%</span>
+                                </div>
+                                <div class="productivity-stat">
+                                    <span class="stat-label">Tempo Médio</span>
+                                    <span class="stat-value" id="todayAvgTime">0s</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Últimos 7 Dias -->
+                        <div class="productivity-card">
+                            <h3>📆 Últimos 7 Dias</h3>
+                            <div class="productivity-stats">
+                                <div class="productivity-stat">
+                                    <span class="stat-label">Total de Ligações</span>
+                                    <span class="stat-value secondary" id="weekTotal">0</span>
+                                </div>
+                                <div class="productivity-stat">
+                                    <span class="stat-label">Ligações Efetivas</span>
+                                    <span class="stat-value highlight" id="weekEffective">0</span>
+                                </div>
+                                <div class="productivity-stat">
+                                    <span class="stat-label">Taxa de Conversão</span>
+                                    <span class="stat-value" id="weekRate">0%</span>
+                                </div>
+                                <div class="productivity-stat">
+                                    <span class="stat-label">Tempo Médio</span>
+                                    <span class="stat-value" id="weekAvgTime">0s</span>
+                                </div>
+                                <div class="productivity-stat">
+                                    <span class="stat-label">Média/Dia</span>
+                                    <span class="stat-value" id="weekAvgPerDay">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Último Mês -->
+                        <div class="productivity-card">
+                            <h3>📊 Último Mês (30 dias)</h3>
+                            <div class="productivity-stats">
+                                <div class="productivity-stat">
+                                    <span class="stat-label">Total de Ligações</span>
+                                    <span class="stat-value secondary" id="monthTotal">0</span>
+                                </div>
+                                <div class="productivity-stat">
+                                    <span class="stat-label">Ligações Efetivas</span>
+                                    <span class="stat-value highlight" id="monthEffective">0</span>
+                                </div>
+                                <div class="productivity-stat">
+                                    <span class="stat-label">Taxa de Conversão</span>
+                                    <span class="stat-value" id="monthRate">0%</span>
+                                </div>
+                                <div class="productivity-stat">
+                                    <span class="stat-label">Tempo Médio</span>
+                                    <span class="stat-value" id="monthAvgTime">0s</span>
+                                </div>
+                                <div class="productivity-stat">
+                                    <span class="stat-label">Média/Dia</span>
+                                    <span class="stat-value" id="monthAvgPerDay">0</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -1056,6 +1112,7 @@
                 filteredData = { ...allData };
                 
                 updateAllMetrics();
+                updateProductivityTables();
                 updateCharts();
                 await getLastUpdate();
 
@@ -1539,168 +1596,85 @@
             return null;
         }
 
-        function applyFilters() {
-            console.log('🔍 === INICIANDO APLICAÇÃO DE FILTROS ===');
+        function updateProductivityTables() {
+            console.log('📊 Atualizando tabelas de produtividade...');
             
-            const period = document.getElementById('filterPeriod').value;
-            const startDate = document.getElementById('filterStartDate').value;
-            const endDate = document.getElementById('filterEndDate').value;
-
-            console.log('📋 Valores dos campos:', { period, startDate, endDate });
-
-            let filterStartDate, filterEndDate;
-
-            switch(period) {
-                case 'today':
-                    filterStartDate = new Date();
-                    filterStartDate.setHours(0, 0, 0, 0);
-                    filterEndDate = new Date();
-                    filterEndDate.setHours(23, 59, 59, 999);
-                    console.log('📅 Filtro: HOJE');
-                    break;
-                case 'week':
-                    filterEndDate = new Date();
-                    filterEndDate.setHours(23, 59, 59, 999);
-                    filterStartDate = new Date();
-                    filterStartDate.setDate(filterStartDate.getDate() - 7);
-                    filterStartDate.setHours(0, 0, 0, 0);
-                    console.log('📅 Filtro: ÚLTIMOS 7 DIAS');
-                    break;
-                case 'month':
-                    filterEndDate = new Date();
-                    filterEndDate.setHours(23, 59, 59, 999);
-                    filterStartDate = new Date();
-                    filterStartDate.setDate(filterStartDate.getDate() - 30);
-                    filterStartDate.setHours(0, 0, 0, 0);
-                    console.log('📅 Filtro: ÚLTIMOS 30 DIAS');
-                    break;
-                case 'custom':
-                    if (!startDate || !endDate) {
-                        console.warn('⚠️ Datas customizadas não preenchidas');
-                        alert('Selecione as datas inicial e final');
-                        return;
-                    }
-                    filterStartDate = new Date(startDate + 'T00:00:00');
-                    filterEndDate = new Date(endDate + 'T23:59:59');
-                    console.log('📅 Filtro: PERSONALIZADO');
-                    break;
-                default: // 'all'
-                    console.log('📅 Filtro: TODOS OS DADOS (resetando)');
-                    filteredData = { ...allData };
-                    updateAllMetrics();
-                    updateCharts();
-                    console.log('✅ Filtros resetados - mostrando todos os dados');
-                    return;
-            }
-
-            console.log('🔍 Range de datas:', {
-                inicio: filterStartDate.toISOString(),
-                fim: filterEndDate.toISOString()
-            });
-
-            console.log('📊 Dados antes do filtro:', {
-                ligacoes: allData.calls.length,
-                leadboard: allData.leadboard.length,
-                oportunidades: allData.opportunities.length
-            });
-
-            // Aplicar filtros nas ligações (campo: data_hora_inicio)
-            console.log('🔍 Filtrando ligações...');
-            console.log('Total de ligações antes do filtro:', allData.calls.length);
+            const now = new Date();
             
-            // Verificar formato das datas nas primeiras ligações
-            if (allData.calls.length > 0) {
-                console.log('Exemplo de ligação (primeira):', {
-                    data_hora_inicio_raw: allData.calls[0]['data_hora_inicio'],
-                    tipo: typeof allData.calls[0]['data_hora_inicio'],
-                    data_parsed: parseGoogleSheetDate(allData.calls[0]['data_hora_inicio'])
-                });
-                
-                // Mostrar mais exemplos
-                const exemplosCom5 = allData.calls.slice(0, 5).map(c => ({
-                    data_raw: c['data_hora_inicio'],
-                    tipo: typeof c['data_hora_inicio'],
-                    parsed: parseGoogleSheetDate(c['data_hora_inicio'])
-                }));
-                console.log('5 primeiros exemplos de datas:', exemplosCom5);
-            }
+            // Definir períodos
+            const todayStart = new Date(now);
+            todayStart.setHours(0, 0, 0, 0);
             
-            filteredData.calls = allData.calls.filter(call => {
+            const weekStart = new Date(now);
+            weekStart.setDate(weekStart.getDate() - 7);
+            weekStart.setHours(0, 0, 0, 0);
+            
+            const monthStart = new Date(now);
+            monthStart.setDate(monthStart.getDate() - 30);
+            monthStart.setHours(0, 0, 0, 0);
+            
+            // Filtrar ligações por período
+            const todayCalls = filteredData.calls.filter(call => {
                 const callDate = parseGoogleSheetDate(call['data_hora_inicio']);
-                if (!callDate) return false;
-                const isValid = callDate >= filterStartDate && callDate <= filterEndDate;
-                return isValid;
+                return callDate && callDate >= todayStart;
             });
             
-            console.log('✅ Ligações após filtro:', filteredData.calls.length);
-
-            // Aplicar filtros no leadboard (campo: Leadboard: Data Criação)
-            filteredData.leadboard = allData.leadboard.filter(lead => {
-                const leadDate = parseGoogleSheetDate(lead['Leadboard: Data Criação']);
-                if (!leadDate) return true; // Incluir se não tiver data
-                return leadDate >= filterStartDate && leadDate <= filterEndDate;
+            const weekCalls = filteredData.calls.filter(call => {
+                const callDate = parseGoogleSheetDate(call['data_hora_inicio']);
+                return callDate && callDate >= weekStart;
             });
-
-            // Aplicar filtros nas oportunidades (campo: Data Criação)
-            filteredData.opportunities = allData.opportunities.filter(opp => {
-                const oppDate = parseGoogleSheetDate(opp['Data Criação']);
-                if (!oppDate) return true; // Incluir se não tiver data
-                return oppDate >= filterStartDate && oppDate <= filterEndDate;
+            
+            const monthCalls = filteredData.calls.filter(call => {
+                const callDate = parseGoogleSheetDate(call['data_hora_inicio']);
+                return callDate && callDate >= monthStart;
             });
-
-            console.log('📊 Dados após filtro:', {
-                ligacoes: filteredData.calls.length,
-                leadboard: filteredData.leadboard.length,
-                oportunidades: filteredData.opportunities.length
-            });
-
-            // Verificar se o filtro zerou todos os dados
-            if (filteredData.calls.length === 0 && allData.calls.length > 0) {
-                console.warn('⚠️ ATENÇÃO: Filtro zerou todas as ligações!');
-                console.log('Possíveis causas:');
-                console.log('1. Não há ligações neste período');
-                console.log('2. Formato de data incompatível');
-                console.log('3. Range de datas muito restritivo');
+            
+            // Calcular métricas para cada período
+            function calculateMetrics(calls, days = null) {
+                const total = calls.length;
+                const effective = calls.filter(c => (parseInt(c['duracao_segundos']) || 0) > 45).length;
+                const rate = total > 0 ? ((effective / total) * 100).toFixed(1) : 0;
                 
-                // Verificar a data mais antiga e mais recente
-                const datas = allData.calls
-                    .filter(c => c['data_hora_inicio'])
-                    .map(c => new Date(c['data_hora_inicio']))
-                    .sort((a, b) => a - b);
+                const effectiveCalls = calls.filter(c => (parseInt(c['duracao_segundos']) || 0) > 45);
+                const avgTime = effectiveCalls.length > 0 
+                    ? Math.round(effectiveCalls.reduce((sum, c) => sum + (parseInt(c['duracao_segundos']) || 0), 0) / effectiveCalls.length)
+                    : 0;
                 
-                if (datas.length > 0) {
-                    console.log('Data mais antiga nas ligações:', datas[0].toLocaleString('pt-BR'));
-                    console.log('Data mais recente nas ligações:', datas[datas.length - 1].toLocaleString('pt-BR'));
-                    console.log('Filtro aplicado de:', filterStartDate.toLocaleString('pt-BR'), 'até', filterEndDate.toLocaleString('pt-BR'));
-                }
+                const avgPerDay = days ? (total / days).toFixed(1) : null;
+                
+                return { total, effective, rate, avgTime, avgPerDay };
             }
-
-            console.log('🔄 Atualizando métricas e gráficos...');
-            updateAllMetrics();
-            updateCharts();
-
-            console.log('✅ === FILTROS APLICADOS COM SUCESSO ===');
-            console.log('📊 Resumo final:', {
-                periodo: period,
-                inicio: filterStartDate.toLocaleDateString('pt-BR'),
-                fim: filterEndDate.toLocaleDateString('pt-BR'),
-                ligacoes: filteredData.calls.length,
-                leadboard: filteredData.leadboard.length,
-                oportunidades: filteredData.opportunities.length
+            
+            // HOJE
+            const today = calculateMetrics(todayCalls);
+            document.getElementById('todayTotal').textContent = today.total;
+            document.getElementById('todayEffective').textContent = today.effective;
+            document.getElementById('todayRate').textContent = `${today.rate}%`;
+            document.getElementById('todayAvgTime').textContent = `${today.avgTime}s`;
+            
+            // ÚLTIMOS 7 DIAS
+            const week = calculateMetrics(weekCalls, 7);
+            document.getElementById('weekTotal').textContent = week.total;
+            document.getElementById('weekEffective').textContent = week.effective;
+            document.getElementById('weekRate').textContent = `${week.rate}%`;
+            document.getElementById('weekAvgTime').textContent = `${week.avgTime}s`;
+            document.getElementById('weekAvgPerDay').textContent = week.avgPerDay;
+            
+            // ÚLTIMO MÊS
+            const month = calculateMetrics(monthCalls, 30);
+            document.getElementById('monthTotal').textContent = month.total;
+            document.getElementById('monthEffective').textContent = month.effective;
+            document.getElementById('monthRate').textContent = `${month.rate}%`;
+            document.getElementById('monthAvgTime').textContent = `${month.avgTime}s`;
+            document.getElementById('monthAvgPerDay').textContent = month.avgPerDay;
+            
+            console.log('✅ Tabelas de produtividade atualizadas', {
+                hoje: today.total,
+                semana: week.total,
+                mes: month.total
             });
         }
 
-        function resetFilters() {
-            document.getElementById('filterPeriod').value = 'all';
-            document.getElementById('filterStartDate').value = '';
-            document.getElementById('filterEndDate').value = '';
-            
-            filteredData = { ...allData };
-            updateAllMetrics();
-            updateCharts();
-            
-            console.log('🔄 Filtros resetados');
-        }
 
         function exportTableToCSV(tableId, filename) {
             const table = document.getElementById(tableId);
@@ -1753,50 +1727,10 @@
             }
         }
 
-        // Event listeners para os filtros
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🔧 Inicializando event listeners dos filtros');
-            
-            // Listener para mudança no período
-            const filterPeriod = document.getElementById('filterPeriod');
-            if (filterPeriod) {
-                filterPeriod.addEventListener('change', function() {
-                    console.log('📅 Período alterado para:', this.value);
-                    // Aplica filtros automaticamente quando muda o período
-                    applyFilters();
-                });
-            }
 
-            // Listeners para as datas (aplicam filtro quando ambas estão preenchidas)
-            const filterStartDate = document.getElementById('filterStartDate');
-            const filterEndDate = document.getElementById('filterEndDate');
-            
-            if (filterStartDate) {
-                filterStartDate.addEventListener('change', function() {
-                    console.log('📅 Data inicial alterada:', this.value);
-                    // Se o período for "custom" e ambas as datas estiverem preenchidas, aplica
-                    if (filterPeriod.value === 'custom' && filterEndDate.value) {
-                        applyFilters();
-                    }
-                });
-            }
-            
-            if (filterEndDate) {
-                filterEndDate.addEventListener('change', function() {
-                    console.log('📅 Data final alterada:', this.value);
-                    // Se o período for "custom" e ambas as datas estiverem preenchidas, aplica
-                    if (filterPeriod.value === 'custom' && filterStartDate.value) {
-                        applyFilters();
-                    }
-                });
-            }
-
-            console.log('✅ Event listeners dos filtros inicializados');
-        });
-
-        console.log('🚀 Dashboard SDR v4.0 - Versão Completa');
+        console.log('🚀 Dashboard SDR v5.0 - Versão Produtividade');
         console.log('✅ Gráficos interativos');
-        console.log('✅ Filtros de data');
+        console.log('✅ Tabelas de produtividade (Hoje, 7 dias, 30 dias)');
         console.log('✅ Tabelas detalhadas');
         console.log('✅ Pipeline por etapas');
         console.log('✅ Métricas financeiras');
