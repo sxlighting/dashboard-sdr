@@ -3,17 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SDR Performance Pro - Dashboard</title>
+    <title>SDR Performance Pro - Fixed</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        /* --- RESET & VARS --- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
             --bg-primary: #0a0e27;
             --bg-card: #1a1f3a;
             --accent-cyan: #00d9ff;
             --accent-green: #06ffa5;
+            --accent-purple: #9d4edd;
+            --accent-yellow: #ffd60a;
             --text-primary: #ffffff;
             --text-secondary: #8b92b0;
             --border-color: #2a3150;
@@ -23,106 +24,83 @@
             font-family: 'Lexend', sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
-            overflow-x: hidden;
-            padding-bottom: 50px;
+            padding-bottom: 40px;
         }
 
-        .bg-gradient {
+        /* LOGIN */
+        .login-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at 50% 0%, rgba(0, 217, 255, 0.1), transparent 70%);
-            pointer-events: none; z-index: -1;
-        }
-
-        /* --- LOGIN --- */
-        .login-container {
+            background: var(--bg-primary); z-index: 1000;
             display: flex; align-items: center; justify-content: center;
-            min-height: 100vh; position: fixed; top: 0; left: 0; width: 100%;
-            background: var(--bg-primary); z-index: 999;
         }
         .login-box {
             background: var(--bg-card); border: 1px solid var(--border-color);
-            border-radius: 16px; padding: 40px; width: 100%; max-width: 400px;
+            padding: 40px; border-radius: 16px; width: 100%; max-width: 400px;
         }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-size: 14px; color: var(--text-secondary); }
+        .form-group { margin-bottom: 16px; }
         .form-input {
             width: 100%; padding: 12px; background: #0f1225; border: 1px solid var(--border-color);
-            border-radius: 8px; color: white;
+            border-radius: 8px; color: white; margin-top: 6px;
         }
-        .btn-primary {
-            width: 100%; padding: 14px; background: var(--accent-cyan); border: none;
-            border-radius: 8px; font-weight: bold; cursor: pointer; color: #000; margin-top: 10px;
+        .btn-action {
+            width: 100%; padding: 14px; background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
+            border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer;
         }
 
-        /* --- DASHBOARD --- */
+        /* DASHBOARD */
         .dashboard { display: none; padding: 20px; max-width: 1400px; margin: 0 auto; }
         .dashboard.active { display: block; }
-        
+
         .header {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 20px 0; border-bottom: 1px solid var(--border-color); margin-bottom: 30px;
+            margin-bottom: 30px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px;
         }
 
-        /* --- FILTROS --- */
-        .filter-bar {
-            display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 30px;
-            background: var(--bg-card); padding: 15px; border-radius: 12px; border: 1px solid var(--border-color);
-            align-items: flex-end;
-        }
-        .filter-item { display: flex; flex-direction: column; gap: 5px; }
-        .filter-item label { font-size: 12px; color: var(--text-secondary); }
-        .date-input {
-            padding: 8px; background: var(--bg-primary); border: 1px solid var(--border-color);
-            color: white; border-radius: 6px; font-family: 'Lexend', sans-serif;
+        .filter-container {
+            background: var(--bg-card); padding: 20px; border-radius: 12px;
+            display: flex; gap: 20px; align-items: end; margin-bottom: 30px; border: 1px solid var(--border-color);
         }
 
-        /* --- GRID --- */
-        .stats-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;
+        /* KPIs */
+        .kpi-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px;
         }
-        .card {
+        .kpi-card {
             background: var(--bg-card); border: 1px solid var(--border-color);
-            border-radius: 12px; padding: 20px;
+            padding: 24px; border-radius: 12px; position: relative;
         }
-        .kpi-label { font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
-        .kpi-value { font-size: 28px; font-weight: 700; font-family: 'JetBrains Mono', monospace; margin: 10px 0; }
+        .kpi-title { font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
+        .kpi-value { font-size: 32px; font-weight: 700; margin: 10px 0; font-family: 'JetBrains Mono', monospace; }
         .kpi-sub { font-size: 12px; color: var(--text-secondary); }
 
-        /* --- CHART FIX --- */
-        .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
-        .chart-card {
+        /* CHARTS E TABELA */
+        .content-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;
+        }
+        .chart-box {
             background: var(--bg-card); border: 1px solid var(--border-color);
-            border-radius: 12px; padding: 20px;
+            padding: 20px; border-radius: 12px;
         }
-        /* AQUI ESTÁ A CORREÇÃO DO SCROLL */
-        .chart-wrapper {
-            position: relative;
-            height: 300px; /* Altura fixa impede crescimento infinito */
-            width: 100%;
-        }
+        /* FIX DO SCROLL INFINITO */
+        .chart-wrapper { position: relative; height: 250px; width: 100%; }
 
-        /* --- TABELA --- */
-        .table-responsive { overflow-x: auto; background: var(--bg-card); border-radius: 12px; padding: 20px; border: 1px solid var(--border-color); }
-        table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        th { text-align: left; font-size: 12px; color: var(--text-secondary); padding: 10px; border-bottom: 1px solid var(--border-color); }
-        td { padding: 15px 10px; font-size: 14px; border-bottom: 1px solid #2a3150; }
-        tr:last-child td { border-bottom: none; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; color: var(--text-secondary); padding: 12px; border-bottom: 1px solid var(--border-color); font-size: 12px; }
+        td { padding: 12px; border-bottom: 1px solid #2a3150; font-size: 14px; }
+        .status-badge { padding: 4px 10px; border-radius: 12px; font-size: 11px; background: rgba(255,255,255,0.1); }
 
-        @media (max-width: 768px) {
-            .charts-row { grid-template-columns: 1fr; }
-        }
+        @media (max-width: 900px) { .content-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-    <div class="bg-gradient"></div>
 
-    <div class="login-container" id="loginScreen">
+    <div class="login-overlay" id="loginScreen">
         <div class="login-box">
-            <h2 style="margin-bottom: 20px; text-align: center;">Acesso SDR</h2>
-            <div id="errorMsg" style="color: #ff6b35; text-align: center; display: none; margin-bottom: 15px; font-size: 13px;">Senha incorreta</div>
+            <h2 style="margin-bottom: 10px; text-align: center;">SDR Analytics v3.1</h2>
+            <div id="loginError" style="color: #ff6b35; text-align: center; display: none; margin-bottom: 15px;">Senha incorreta</div>
             <form id="loginForm">
                 <div class="form-group">
-                    <label>Seu Nome</label>
+                    <label>SDR</label>
                     <select id="userSelect" class="form-input" required>
                         <option value="">Selecione...</option>
                         <option value="Nathalia Lima">Nathalia Lima</option>
@@ -135,94 +113,101 @@
                     <label>Senha</label>
                     <input type="password" id="passInput" class="form-input" required>
                 </div>
-                <button type="submit" class="btn-primary">Entrar</button>
+                <button type="submit" class="btn-action">Acessar</button>
             </form>
         </div>
     </div>
 
-    <div class="dashboard" id="dashScreen">
+    <div class="dashboard" id="mainDash">
         <div class="header">
             <div>
-                <h1>Performance</h1>
-                <p style="color: var(--text-secondary); font-size: 14px;" id="currentDate">...</p>
+                <h1>Dashboard de Performance</h1>
+                <p style="color: var(--text-secondary); font-size: 14px;" id="headerDate">Carregando...</p>
             </div>
-            <button onclick="location.reload()" style="background:none; border:1px solid #333; color:#fff; padding:8px 15px; border-radius:6px; cursor:pointer;">Sair</button>
+            <div style="text-align: right;">
+                <h3 id="userNameDisplay">...</h3>
+                <button onclick="logout()" style="background:none; border:none; color: var(--accent-cyan); cursor:pointer;">Sair</button>
+            </div>
         </div>
 
-        <div class="filter-bar">
-            <div class="filter-item">
-                <label>Início</label>
-                <input type="date" id="dateStart" class="date-input">
+        <div class="filter-container">
+            <div>
+                <label style="font-size:12px; color:var(--text-secondary);">Data Início (Ligações/Opps)</label>
+                <input type="date" id="dateStart" class="form-input" style="width: auto;">
             </div>
-            <div class="filter-item">
-                <label>Fim</label>
-                <input type="date" id="dateEnd" class="date-input">
+            <div>
+                <label style="font-size:12px; color:var(--text-secondary);">Data Fim</label>
+                <input type="date" id="dateEnd" class="form-input" style="width: auto;">
             </div>
-            <button onclick="applyFilters()" class="btn-primary" style="width: auto; margin: 0; padding: 8px 20px;">Filtrar</button>
+            <button onclick="runFilters()" class="btn-action" style="width: auto; padding: 10px 24px; margin-bottom: 2px;">Filtrar Dados</button>
         </div>
 
-        <div id="loading" style="text-align: center; padding: 40px; display: none;">
-            <p>Carregando dados...</p>
+        <div id="loading" style="text-align: center; padding: 50px;">
+            <div style="font-size: 20px;">Carregando dados do Google Sheets...</div>
         </div>
 
-        <div id="content" style="display: none;">
-            <div class="stats-grid">
-                <div class="card">
-                    <div class="kpi-label">Ligações Totais</div>
-                    <div class="kpi-value" id="valCalls">0</div>
-                    <div class="kpi-sub" id="valEffective">0 > 45s</div>
+        <div id="dashContent" style="display: none;">
+            
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-title">Total Ligações</div>
+                    <div class="kpi-value" id="kpiCalls">0</div>
+                    <div class="kpi-sub" id="kpiEffective">0 Efetivas (>45s)</div>
                 </div>
-                <div class="card">
-                    <div class="kpi-label">Em Qualificação</div>
-                    <div class="kpi-value" id="valSuspect" style="color: #ffd60a;">0</div>
-                    <div class="kpi-sub">Suspect</div>
+                <div class="kpi-card" style="border-bottom: 2px solid var(--accent-yellow);">
+                    <div class="kpi-title">Em Qualificação</div>
+                    <div class="kpi-value" id="kpiSuspect" style="color: var(--accent-yellow);">0</div>
+                    <div class="kpi-sub">Fase: Suspect</div>
                 </div>
-                <div class="card">
-                    <div class="kpi-label">Qualificados</div>
-                    <div class="kpi-value" id="valQualified" style="color: #06ffa5;">0</div>
-                    <div class="kpi-sub">Prontos p/ Venda</div>
+                <div class="kpi-card" style="border-bottom: 2px solid var(--accent-green);">
+                    <div class="kpi-title">Total Qualificados</div>
+                    <div class="kpi-value" id="kpiQualified" style="color: var(--accent-green);">0</div>
+                    <div class="kpi-sub">Leadboard (Atual)</div>
                 </div>
-                <div class="card">
-                    <div class="kpi-label">Pipeline Gerado</div>
-                    <div class="kpi-value" id="valMoney" style="color: #06ffa5;">R$ 0,00</div>
-                    <div class="kpi-sub" id="valOppCount">0 Oportunidades</div>
+                <div class="kpi-card" style="border-bottom: 2px solid var(--accent-purple);">
+                    <div class="kpi-title">Pipeline Estimado</div>
+                    <div class="kpi-value" id="kpiValue" style="color: var(--accent-purple);">R$ 0,00</div>
+                    <div class="kpi-sub" id="kpiOpps">0 Oportunidades Criadas</div>
                 </div>
             </div>
 
-            <div class="charts-row">
-                <div class="chart-card">
-                    <h3 style="font-size: 16px; margin-bottom: 15px;">Funil de Conversão</h3>
+            <div class="content-grid">
+                <div class="chart-box">
+                    <h3 style="margin-bottom: 15px; font-size: 16px;">Funil de Leadboard (Snapshot)</h3>
                     <div class="chart-wrapper">
                         <canvas id="funnelChart"></canvas>
                     </div>
                 </div>
-                <div class="chart-card">
-                    <h3 style="font-size: 16px; margin-bottom: 15px;">Atividade Diária</h3>
+                <div class="chart-box">
+                    <h3 style="margin-bottom: 15px; font-size: 16px;">Volume Diário de Ligações</h3>
                     <div class="chart-wrapper">
-                        <canvas id="callsChart"></canvas>
+                        <canvas id="dailyChart"></canvas>
                     </div>
                 </div>
             </div>
 
-            <div class="table-responsive">
-                <h3 style="font-size: 16px; margin-bottom: 15px;">Últimas Oportunidades</h3>
-                <table id="oppTable">
-                    <thead>
-                        <tr>
-                            <th>Cliente / Oportunidade</th>
-                            <th>Fase</th>
-                            <th>Valor</th>
-                            <th>Data</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
+            <div class="chart-box">
+                <h3 style="margin-bottom: 15px; font-size: 16px;">Últimas Oportunidades Geradas</h3>
+                <div style="overflow-x: auto;">
+                    <table id="oppsTable">
+                        <thead>
+                            <tr>
+                                <th>Oportunidade</th>
+                                <th>Fase</th>
+                                <th>Valor</th>
+                                <th>Responsável</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
             </div>
+
         </div>
     </div>
 
     <script>
-        // --- CONFIG ---
+        // CONFIGURAÇÃO
         const CONFIG = {
             users: { 'Nathalia Lima': 'sdr2025', 'Beatriz Santos': 'sdr2025', 'Larissa Portella': 'sdr2025', 'Felipe Mitterbach': 'sdr2025' },
             emailMap: { 'nathalia': 'Nathalia Lima', 'beatriz': 'Beatriz Santos', 'larissa': 'Larissa Portella', 'felipe': 'Felipe Mitterbach' },
@@ -230,262 +215,288 @@
             callsId: '1Hmcq0ihu1bpwwM-MuUzAYULiilH82qj7xFyI-VnyNAo'
         };
 
-        let state = {
+        // ESTADO GLOBAL
+        let APP = {
             user: null,
-            raw: { leadboard: [], opps: [], calls: [] },
-            charts: { funnel: null, calls: null }
+            data: { leadboard: [], opps: [], calls: [] },
+            charts: { funnel: null, daily: null }
         };
 
-        // --- INICIALIZAÇÃO ---
+        // 1. INICIALIZAÇÃO
         document.addEventListener('DOMContentLoaded', () => {
-            const now = new Date();
-            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-            document.getElementById('dateStart').valueAsDate = firstDay;
-            document.getElementById('dateEnd').valueAsDate = now;
-            document.getElementById('currentDate').textContent = now.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+            const today = new Date();
+            const startMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            
+            document.getElementById('dateStart').valueAsDate = startMonth;
+            document.getElementById('dateEnd').valueAsDate = today;
+            document.getElementById('headerDate').textContent = today.toLocaleDateString('pt-BR', {weekday: 'long', day:'numeric', month:'long'});
         });
 
+        // 2. AUTH
         document.getElementById('loginForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const u = document.getElementById('userSelect').value;
             const p = document.getElementById('passInput').value;
+
             if (CONFIG.users[u] === p) {
-                state.user = u;
+                APP.user = u;
+                document.getElementById('userNameDisplay').textContent = u;
                 document.getElementById('loginScreen').style.display = 'none';
-                document.getElementById('dashScreen').classList.add('active');
-                loadData();
+                document.getElementById('mainDash').classList.add('active');
+                initDataLoad();
             } else {
-                document.getElementById('errorMsg').style.display = 'block';
+                document.getElementById('loginError').style.display = 'block';
             }
         });
 
-        // --- CARREGAMENTO DE DADOS ---
-        async function loadData() {
+        function logout() { location.reload(); }
+
+        // 3. DATA FETCHING (Robusto)
+        async function initDataLoad() {
             document.getElementById('loading').style.display = 'block';
             try {
-                const [leadboard, opps, calls] = await Promise.all([
-                    fetchSheet(CONFIG.nectarId, 'Leadboard'),
-                    fetchSheet(CONFIG.nectarId, 'Oportunidades'),
-                    fetchSheet(CONFIG.callsId, 'Ligacoes')
+                // Fetch paralelo
+                const [leadboardRaw, oppsRaw, callsRaw] = await Promise.all([
+                    fetchGviz(CONFIG.nectarId, 'Leadboard'),
+                    fetchGviz(CONFIG.nectarId, 'Oportunidades'),
+                    fetchGviz(CONFIG.callsId, 'Ligacoes')
                 ]);
 
-                // Filtro inicial por usuário
-                state.raw.leadboard = leadboard.filter(r => r['Leadboard: Responsável'] === state.user);
+                // Filtro BASE por usuário (Nunca muda durante a sessão)
+                APP.data.leadboard = leadboardRaw.filter(r => r['Leadboard: Responsável'] === APP.user);
                 
-                state.raw.opps = opps.filter(r => {
-                    const res = r['Corresponsáveis: Usuários'] || '';
-                    return res.includes(state.user);
+                APP.data.opps = oppsRaw.filter(r => {
+                    const owners = r['Corresponsáveis: Usuários'] || '';
+                    return owners.includes(APP.user);
                 });
 
-                state.raw.calls = calls.filter(r => {
+                APP.data.calls = callsRaw.filter(r => {
                     const email = (r['usuario_email'] || '').toLowerCase();
-                    for(let k in CONFIG.emailMap) {
-                        if(email.includes(k) && CONFIG.emailMap[k] === state.user) return true;
+                    // Lógica de mapeamento reverso de email -> nome
+                    for (const [key, val] of Object.entries(CONFIG.emailMap)) {
+                        if (email.includes(key) && val === APP.user) return true;
                     }
                     return false;
                 });
 
-                applyFilters();
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('content').style.display = 'block';
+                console.log(`Dados carregados: ${APP.data.leadboard.length} Leads, ${APP.data.calls.length} Calls`);
+                
+                // Executa filtros e renderização
+                runFilters();
 
-            } catch (e) {
-                alert('Erro ao carregar dados. Verifique a conexão.');
-                console.error(e);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('dashContent').style.display = 'block';
+
+            } catch (err) {
+                console.error(err);
+                alert('Erro crítico ao carregar dados. Verifique console.');
             }
         }
 
-        async function fetchSheet(id, sheet) {
+        async function fetchGviz(id, sheet) {
             const url = `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheet)}`;
-            const r = await fetch(url);
-            const t = await r.text();
-            const json = JSON.parse(t.substring(47).slice(0, -2));
+            const res = await fetch(url);
+            const txt = await res.text();
+            // Limpeza do JSONP do Google
+            const json = JSON.parse(txt.substring(47).slice(0, -2));
             const cols = json.table.cols.map(c => c.label || c.id);
-            return json.table.rows.map(row => {
-                let obj = {};
-                row.c.forEach((cell, i) => obj[cols[i]] = cell ? cell.v : null);
-                return obj;
+            return json.table.rows.map(r => {
+                let row = {};
+                r.c.forEach((cell, i) => {
+                    row[cols[i]] = cell ? (cell.v === null ? '' : cell.v) : '';
+                });
+                return row;
             });
         }
 
-        // --- PARSING & FILTROS ---
-        
-        // Função Especial para limpar Valor Monetário
-        function parseCurrency(val) {
-            if (!val) return 0;
-            if (typeof val === 'number') return val;
-            
-            // Ex: "R$ 1.200,50" -> "1200.50"
-            // 1. Remove tudo que não é número, ponto ou vírgula
-            let clean = val.toString().replace(/[^\d.,]/g, '');
-            
-            // 2. Se tiver vírgula, substitui ponto de milhar por vazio e vírgula por ponto
-            if (clean.includes(',')) {
-                clean = clean.replace(/\./g, '').replace(',', '.');
-            }
-            
-            const num = parseFloat(clean);
-            return isNaN(num) ? 0 : num;
-        }
-
-        window.applyFilters = function() {
+        // 4. LÓGICA DE NEGÓCIO E FILTROS
+        window.runFilters = function() {
             const dStart = new Date(document.getElementById('dateStart').value);
             const dEnd = new Date(document.getElementById('dateEnd').value);
             dEnd.setHours(23, 59, 59);
 
-            // Filtrar Oportunidades por Data
-            const filteredOpps = state.raw.opps.filter(o => {
-                const dDate = new Date(o['Data de criação'] || o['Data'] || o['Criado em']); // Ajuste o nome da coluna se precisar
-                return !isNaN(dDate) && dDate >= dStart && dDate <= dEnd;
+            // A. FILTRAR LIGAÇÕES (Temporal)
+            const filteredCalls = APP.data.calls.filter(c => {
+                const cDate = parseGvizDate(c['data'] || c['data_inicio']);
+                return cDate && cDate >= dStart && cDate <= dEnd;
             });
 
-            // Filtrar Ligações por Data
-            const filteredCalls = state.raw.calls.filter(c => {
-                let dDate;
-                if(c['data']) { // Formato GViz
-                   if(typeof c['data'] === 'string' && c['data'].includes('Date')) 
-                       dDate = new Date(eval("new " + c['data']));
-                   else dDate = new Date(c['data']);
-                }
-                return !isNaN(dDate) && dDate >= dStart && dDate <= dEnd;
+            // B. FILTRAR OPORTUNIDADES (Temporal)
+            // Se não tiver coluna de data, mostra tudo para não zerar
+            const filteredOpps = APP.data.opps.filter(o => {
+                const oDate = parseGvizDate(o['Data de criação'] || o['Data']);
+                if (!oDate) return true; // Se não tem data, assume que entra
+                return oDate >= dStart && oDate <= dEnd;
             });
 
-            // Leadboard é snapshot (geralmente não tem data de criação fácil), mantemos o filtro de data APENAS para opps e calls
-            // Se quiser filtrar leadboard, precisaria de uma coluna "Data Entrada"
-            const filteredLeadboard = state.raw.leadboard; 
+            // C. LEADBOARD (Snapshot - NÃO FILTRAR POR DATA)
+            // Leadboard é "Como estou hoje". Filtrar por data de criação antiga esconderia leads ativos.
+            const currentLeadboard = APP.data.leadboard; 
 
-            updateUI(filteredLeadboard, filteredOpps, filteredCalls);
+            calculateKPIs(currentLeadboard, filteredOpps, filteredCalls);
+            renderCharts(currentLeadboard, filteredCalls);
+            renderTable(filteredOpps);
         };
 
-        function updateUI(leadboard, opps, calls) {
-            // 1. Calls KPI
+        function parseGvizDate(val) {
+            if (!val) return null;
+            if (typeof val === 'string' && val.includes('Date')) {
+                // Formato "Date(2023,0,1)"
+                const parts = val.match(/\d+/g);
+                return new Date(parts[0], parts[1], parts[2]);
+            }
+            const d = new Date(val);
+            return isNaN(d.getTime()) ? null : d;
+        }
+
+        function calculateKPIs(leadboard, opps, calls) {
+            // CALLS
             const totalCalls = calls.length;
-            const effectiveCalls = calls.filter(c => (c['duracao_segundos'] || 0) > 45).length;
+            const effective = calls.filter(c => (Number(c['duracao_segundos']) || 0) > 45).length;
+
+            // PIPELINE (Leadboard)
+            // Normalização: remove espaços e lowercase para comparar
+            const normalize = (s) => (s || '').toString().toLowerCase().trim();
             
-            // 2. Pipeline KPI (Correção do Bug de Qualificados)
-            let countSuspect = 0;
-            let countQualified = 0;
+            const suspect = leadboard.filter(l => normalize(l['Leadboard: Etapa']) === 'suspect').length;
+            
+            // FIX: Procura por "qualificad" (pega Qualificado, Qualificada, Qualificando)
+            const qualified = leadboard.filter(l => normalize(l['Leadboard: Etapa']).includes('qualificad')).length;
 
-            leadboard.forEach(l => {
-                // Normaliza string para lowercase e remove espaços
-                const stage = (l['Leadboard: Etapa'] || '').toLowerCase().trim();
-                
-                // Lógica mais flexível
-                if(stage.includes('suspect')) countSuspect++;
-                if(stage.includes('qualificad') || stage.includes('ganha')) countQualified++; 
-            });
-
-            // 3. Financeiro KPI (Correção do Bug de Valor)
+            // FINANCEIRO
             let totalValue = 0;
             opps.forEach(o => {
-                // Tenta achar a coluna de valor em várias possibilidades
-                const valRaw = o['Valor'] || o['Receita'] || o['Valor Estimado'] || o['Budget'];
-                totalValue += parseCurrency(valRaw);
-            });
-
-            // DOM Updates
-            document.getElementById('valCalls').textContent = totalCalls;
-            document.getElementById('valEffective').textContent = `${effectiveCalls} > 45s`;
-            document.getElementById('valSuspect').textContent = countSuspect;
-            document.getElementById('valQualified').textContent = countQualified;
-            document.getElementById('valMoney').textContent = totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            document.getElementById('valOppCount').textContent = `${opps.length} opps`;
-
-            // Tabelas e Gráficos
-            renderTable(opps);
-            renderCharts(countSuspect, countQualified, calls);
-        }
-
-        function renderTable(opps) {
-            const tbody = document.querySelector('#oppTable tbody');
-            tbody.innerHTML = '';
-            opps.slice(0, 8).forEach(o => {
-                const tr = document.createElement('tr');
-                const val = parseCurrency(o['Valor'] || o['Valor Estimado']);
-                const dateRaw = o['Data de criação'] || o['Data'];
-                let dateStr = '-';
-                
-                if (dateRaw) {
-                    const d = new Date(dateRaw);
-                    if (!isNaN(d)) dateStr = d.toLocaleDateString('pt-BR');
+                // Tenta achar a coluna de valor
+                const rawVal = o['Valor'] || o['Receita'] || o['Valor Estimado'] || '0';
+                // Limpa R$, pontos e vírgulas
+                let valStr = rawVal.toString().replace('R$', '').trim();
+                if (valStr.includes(',')) {
+                    valStr = valStr.replace('.', '').replace(',', '.'); // BR para US
                 }
-
-                tr.innerHTML = `
-                    <td style="font-weight:600">${o['Oportunidade'] || o['Nome'] || 'Cliente'}</td>
-                    <td><span style="background:rgba(255,255,255,0.1); padding:2px 8px; border-radius:4px; font-size:12px;">${o['Fase'] || '-'}</span></td>
-                    <td style="font-family:'JetBrains Mono'">${val.toLocaleString('pt-BR', {style:'currency', currency:'BRL'})}</td>
-                    <td style="color:#8b92b0; font-size:12px;">${dateStr}</td>
-                `;
-                tbody.appendChild(tr);
+                const val = parseFloat(valStr);
+                if (!isNaN(val)) totalValue += val;
             });
+
+            // Atualiza DOM
+            document.getElementById('kpiCalls').innerText = totalCalls;
+            document.getElementById('kpiEffective').innerText = `${effective} Efetivas (>45s)`;
+            
+            document.getElementById('kpiSuspect').innerText = suspect;
+            document.getElementById('kpiQualified').innerText = qualified;
+
+            document.getElementById('kpiValue').innerText = totalValue.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
+            document.getElementById('kpiOpps').innerText = `${opps.length} Oportunidades`;
         }
 
-        function renderCharts(suspect, qualified, calls) {
-            // Config comum
-            Chart.defaults.color = '#8b92b0';
-            Chart.defaults.borderColor = '#2a3150';
+        // 5. VISUALIZAÇÃO
+        function renderCharts(leadboard, calls) {
+            // FUNIL (Chart.js)
+            const normalize = (s) => (s || '').toString().toLowerCase().trim();
+            const countStage = (slug) => leadboard.filter(l => normalize(l['Leadboard: Etapa']).includes(slug)).length;
+            
+            const dataFunnel = [
+                countStage('suspect'),
+                countStage('agendamento'), // Verifica se existe essa etapa no seu CRM
+                countStage('qualificad')
+            ];
 
-            // Funil
-            if(state.charts.funnel) state.charts.funnel.destroy();
-            state.charts.funnel = new Chart(document.getElementById('funnelChart'), {
+            if (APP.charts.funnel) APP.charts.funnel.destroy();
+            APP.charts.funnel = new Chart(document.getElementById('funnelChart'), {
                 type: 'bar',
                 data: {
-                    labels: ['Suspect', 'Qualificado'],
+                    labels: ['Suspect', 'Agendamento', 'Qualificado'],
                     datasets: [{
                         label: 'Leads',
-                        data: [suspect, qualified],
-                        backgroundColor: ['#ffd60a', '#06ffa5'],
+                        data: dataFunnel,
+                        backgroundColor: ['#ffd60a', '#00d9ff', '#06ffa5'],
                         barThickness: 40
                     }]
                 },
                 options: {
                     indexAxis: 'y',
                     responsive: true,
-                    maintainAspectRatio: false, // IMPORTANTE PARA O CSS CONTROLAR A ALTURA
-                    plugins: { legend: { display: false } }
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { 
+                        x: { grid: { color: '#2a3150' }, ticks: { color: '#8b92b0' } },
+                        y: { grid: { display: false }, ticks: { color: '#fff' } }
+                    }
                 }
             });
 
-            // Linha do tempo
+            // LINHA DO TEMPO
             const callsByDate = {};
             calls.forEach(c => {
-                let dKey = 'N/D';
-                if(c['data']) {
-                     // Lógica para extrair data do GViz string ou objeto Date
-                     const raw = c['data'];
-                     const d = (typeof raw === 'string' && raw.includes('Date')) ? new Date(eval("new " + raw)) : new Date(raw);
-                     if(!isNaN(d)) dKey = d.toLocaleDateString('pt-BR');
+                const dateObj = parseGvizDate(c['data'] || c['data_inicio']);
+                if (dateObj) {
+                    const key = dateObj.toLocaleDateString('pt-BR');
+                    callsByDate[key] = (callsByDate[key] || 0) + 1;
                 }
-                callsByDate[dKey] = (callsByDate[dKey] || 0) + 1;
             });
 
             // Ordenar datas
-            const labels = Object.keys(callsByDate).sort((a,b) => {
-                const [da, ma, ya] = a.split('/').map(Number);
-                const [db, mb, yb] = b.split('/').map(Number);
-                return new Date(ya, ma-1, da) - new Date(yb, mb-1, db);
+            const sortedLabels = Object.keys(callsByDate).sort((a,b) => {
+                const [da,ma,ya] = a.split('/');
+                const [db,mb,yb] = b.split('/');
+                return new Date(ya,ma-1,da) - new Date(yb,mb-1,db);
             });
 
-            if(state.charts.calls) state.charts.calls.destroy();
-            state.charts.calls = new Chart(document.getElementById('callsChart'), {
+            if (APP.charts.daily) APP.charts.daily.destroy();
+            APP.charts.daily = new Chart(document.getElementById('dailyChart'), {
                 type: 'line',
                 data: {
-                    labels: labels,
+                    labels: sortedLabels,
                     datasets: [{
                         label: 'Ligações',
-                        data: labels.map(l => callsByDate[l]),
-                        borderColor: '#00d9ff',
-                        backgroundColor: 'rgba(0, 217, 255, 0.1)',
+                        data: sortedLabels.map(l => callsByDate[l]),
+                        borderColor: '#9d4edd',
+                        backgroundColor: 'rgba(157, 78, 221, 0.1)',
                         fill: true,
                         tension: 0.3
                     }]
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false, // IMPORTANTE
+                    maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true } }
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#2a3150' } },
+                        x: { grid: { display: false } }
+                    }
                 }
+            });
+        }
+
+        function renderTable(opps) {
+            const tbody = document.querySelector('#oppsTable tbody');
+            tbody.innerHTML = '';
+            
+            // Pega as 5 últimas
+            const sliced = opps.slice(0, 5);
+            
+            if (sliced.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: #8b92b0;">Nenhuma oportunidade no período.</td></tr>';
+                return;
+            }
+
+            sliced.forEach(o => {
+                const tr = document.createElement('tr');
+                const name = o['Oportunidade'] || o['Nome'] || 'Sem Nome';
+                const stage = o['Fase'] || '-';
+                const owner = o['Responsável'] || '-';
+                
+                // Formata Valor
+                let valDisp = '-';
+                const rawVal = o['Valor'] || o['Receita'];
+                if (rawVal) valDisp = rawVal; 
+
+                tr.innerHTML = `
+                    <td style="font-weight:600; color:#fff;">${name}</td>
+                    <td><span class="status-badge">${stage}</span></td>
+                    <td style="font-family:'JetBrains Mono'">${valDisp}</td>
+                    <td style="color:#8b92b0;">${owner}</td>
+                `;
+                tbody.appendChild(tr);
             });
         }
     </script>
